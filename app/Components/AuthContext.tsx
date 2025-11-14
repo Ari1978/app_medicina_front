@@ -40,35 +40,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // 🔥 URL del backend (sin fallback a localhost)
   const base = process.env.NEXT_PUBLIC_BACKEND_URL!;
-  // Si no existe, error inmediato:
-  if (!base) console.error("❌ Falta NEXT_PUBLIC_BACKEND_URL en Vercel");
+  if (!base) console.error("❌ Falta NEXT_PUBLIC_BACKEND_URL");
 
-  // ------------------------------------------
-  // 🔥 Normalización universal de usuario
-  // ------------------------------------------
-  const normalizeUser = (u: any): User => ({
-    ...u,
-    _id: u._id || u.id,
-    id: u._id || u.id,
-  });
+  // ----------------------------------------------------
+  // 🔧 Normalize seguro — NO rompe role, ID, ni permisos
+  // ----------------------------------------------------
+  const normalizeUser = (u: any): User => {
+    if (!u) return null as any;
 
-  // ------------------------------------------
+    return {
+      _id: u._id ?? u.id ?? null,
+      id: u._id ?? u.id ?? null,
+      nombre: u.nombre,
+      apellido: u.apellido,
+      cuit: u.cuit,
+      email: u.email,
+      username: u.username,
+      role: u.role, // ← NO TOCAR
+      permisos: u.permisos || [],
+      empresa: u.empresa,
+      contacto: u.contacto,
+    };
+  };
+
+  // ----------------------------------------------------
   // 🔐 LOGIN GENÉRICO
-  // ------------------------------------------
+  // ----------------------------------------------------
   const loginRequest = async (url: string, body: any) => {
     setLoading(true);
     try {
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        credentials: "include", // ← IMPORTANTE
         body: JSON.stringify(body),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Credenciales inválidas");
+
+      if (!data.user?.role) throw new Error("Usuario inválido");
 
       const u = normalizeUser(data.user);
       setUser(u);
@@ -79,9 +91,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // ------------------------------------------
-  // 🔐 LOGIN ESPECÍFICOS
-  // ------------------------------------------
   const loginUser = async (cuit: string, password: string) =>
     loginRequest(`${base}/api/user/login`, { cuit, password });
 
@@ -91,9 +100,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loginAdmin = async (username: string, password: string) =>
     loginRequest(`${base}/api/admin/login`, { username, password });
 
-  // ------------------------------------------
+  // ----------------------------------------------------
   // 🔓 LOGOUT
-  // ------------------------------------------
+  // ----------------------------------------------------
   const logout = async () => {
     if (!user) return;
 
@@ -110,9 +119,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.replace("/login");
   };
 
-  // ------------------------------------------
-  // 🔄 AUTO-LOGIN (CHECK COOKIE)
-  // ------------------------------------------
+  // ----------------------------------------------------
+  // 🔄 AUTOLOGIN POR COOKIE
+  // ----------------------------------------------------
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -126,10 +135,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         for (const endpoint of endpoints) {
           const res = await fetch(endpoint, { credentials: "include" });
+
           if (res.ok) {
             const data = await res.json();
-            const u = normalizeUser(data.user);
 
+            if (!data.user?.role) continue;
+
+            const u = normalizeUser(data.user);
             setUser(u);
 
             if (pathname === "/login") {
@@ -152,9 +164,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkSession();
   }, []);
 
-  // ------------------------------------------
+  // ----------------------------------------------------
   // ➡️ REDIRECCIÓN POR ROL Y PERMISOS
-  // ------------------------------------------
+  // ----------------------------------------------------
   const redirectByRole = (role: Role, permisos?: string[]) => {
     if (role === "user") {
       router.replace("/PanelUsuario");
