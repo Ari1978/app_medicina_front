@@ -1,0 +1,60 @@
+/* -------------------------------
+   Contenedor principal tipo card
+--------------------------------- */
+.about-card {
+  max-width: 700px;               /* ancho limitado tipo card */
+  margin: 4rem auto;              /* centrado y separación del navbar */
+  padding: 2rem 2.5rem;           /* espacio interno */
+  background-color: #ffffff;      /* fondo blanco */
+  border-radius: 12px;            /* bordes redondeados */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* sombra suave */
+  text-align: center;             /* centrar texto */
+}
+
+/* -------------------------------
+   Título principal
+--------------------------------- */
+.about-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1e40af;
+}
+
+.highlight {
+  color: #2563eb; /* color destacado */
+}
+
+/* -------------------------------
+   Párrafos
+--------------------------------- */
+.about-text {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #374151;
+  line-height: 1.6;
+}
+
+/* -------------------------------
+   Sección de contacto
+--------------------------------- */
+.about-contact {
+  margin-top: 1.5rem;
+}
+
+/* -------------------------------
+   Botón de contacto
+--------------------------------- */
+.contact-btn {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 9999px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.contact-btn:hover {
+  background-color: #1e40af;
+}

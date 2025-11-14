@@ -1,0 +1,85 @@
+/* Fondo principal */
+.contact-main {
+  max-width: 700px;
+  margin: 10rem auto; /* Más espacio desde el navbar */
+  padding: 2rem 2.5rem;
+  background: linear-gradient(145deg, #1f2937, #111827); /* fondo oscuro elegante */
+  color: #f9fafb; /* texto claro para contraste */
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Títulos */
+.contact-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #60a5fa; /* azul claro */
+  text-align: center;
+}
+
+.contact-description {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #cbd5e1; /* gris claro */
+}
+
+/* Mensajes de éxito o error */
+.contact-success {
+  color: #22c55e;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.contact-error {
+  color: #f87171;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Inputs y textarea */
+.contact-input,
+.contact-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #374151; /* borde gris oscuro */
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  background-color: #1f2937; /* input oscuro */
+  color: #f9fafb;
+}
+
+.contact-input:focus,
+.contact-textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+/* Botón */
+.contact-button {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.contact-button:hover {
+  background-color: #1e40af;
+}
+
+/* Labels */
+.contact-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #e5e7eb; /* texto claro */
+}

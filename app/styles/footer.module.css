@@ -1,0 +1,113 @@
+/* footer.module.css */
+
+.footer {
+  background-color: #0f172a;
+  color: #cbd5e1;
+  border-top: 1px solid #334155;
+  padding: 3rem 1.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centrado horizontal */
+  text-align: center; /* Texto centrado */
+}
+
+.footerContainer {
+  max-width: 1280px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  justify-items: center; /* Centrado columnas */
+}
+
+@media (min-width: 768px) {
+  .footerContainer {
+    grid-template-columns: repeat(4, 1fr);
+    justify-items: start; /* Columnas alineadas a la izquierda */
+    text-align: left; /* Texto alineado a la izquierda */
+  }
+}
+
+.footerLogo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.footerLogo img {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+.footerDescription {
+  color: #94a3b8;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.footerTitle {
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.footerLinks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footerLinks li {
+  margin-bottom: 0.5rem;
+}
+
+.footerLinks a {
+  color: #cbd5e1;
+  transition: color 0.3s, transform 0.3s;
+  text-decoration: none;
+}
+
+.footerLinks a:hover {
+  color: #38bdf8;
+  transform: translateX(3px);
+}
+
+.footerContact p,
+.footerContact a {
+  margin-bottom: 0.5rem;
+  display: block;
+  color: #cbd5e1;
+  text-decoration: none;
+}
+
+.footerContact a:hover {
+  color: #38bdf8;
+}
+
+.footerSocials {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.footerSocials a {
+  color: #cbd5e1;
+  transition: color 0.3s, transform 0.3s;
+}
+
+.footerSocials a:hover {
+  color: #38bdf8;
+  transform: scale(1.1);
+}
+
+.footerCopy {
+  margin-top: 2.5rem;
+  border-top: 1px solid #334155;
+  padding-top: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}

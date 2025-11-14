@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/* -------------------------------
+   Fondo y layout general
+--------------------------------- */
+body {
+  background-color: #f0f4f8;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1f2937;
+  margin: 0;
+  padding: 0;
+}
+
+/* -------------------------------
+   Contenedor principal para formularios
+--------------------------------- */
+.contact-main {
+  margin-top: 25px; /* margen superior para separar del navbar */
+ 
+}
+
+/* -------------------------------
+   Títulos
+--------------------------------- */
+.contact-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1e40af;
+  text-align: center;
+}
+
+.contact-description {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* -------------------------------
+   Mensajes de éxito o error
+--------------------------------- */
+.contact-success {
+  color: #16a34a;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.contact-error {
+  color: #dc2626;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* -------------------------------
+   Labels
+--------------------------------- */
+.contact-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+/* -------------------------------
+   Inputs y textarea
+--------------------------------- */
+.contact-input,
+.contact-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+.contact-input:focus,
+.contact-textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+/* -------------------------------
+   Botones
+--------------------------------- */
+.contact-button {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.contact-button:hover {
+  background-color: #1e40af;
+}
+
+/* -------------------------------
+   Links y mensajes debajo del formulario
+--------------------------------- */
+.contact-footer {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.contact-footer a {
+  color: #2563eb;
+  text-decoration: underline;
+  margin-left: 0.25rem;
+}
+
+.contact-footer a:hover {
+  color: #1e40af;
+}
+
+/* -------------------------------
+   Ajustes para tarjetas grandes (opcional)
+--------------------------------- */
+.card {
+  max-width: 850px;
+  background-color: #1e293b;
+  border-radius: 16px;
+  padding: 3rem 3.5rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+  border: 1px solid #334155;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 48px rgba(59, 130, 246, 0.7);
+}
+
+.titulo {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #60a5fa;
+  text-align: center;
+  letter-spacing: 1.1px;
+}
+
+.parrafo {
+  color: #93c5fd;
+}
