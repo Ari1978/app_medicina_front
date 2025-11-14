@@ -14,10 +14,8 @@ export default function UsuarioBuscador() {
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 🔥 CORRECTO → Backend en Render
-  const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "");
-
-  if (!API_URL) console.error("❌ Falta NEXT_PUBLIC_BACKEND_URL en entorno Vercel");
+  // 🔥 Backend seguro con fallback (NUNCA undefined)
+  const API_URL: string = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000").replace(/\/$/, "");
 
   const handleBuscar = async () => {
     setUsuario(null);

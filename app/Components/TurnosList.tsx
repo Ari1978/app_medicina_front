@@ -8,10 +8,9 @@ export default function TurnosConfirmados() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 USAR VARIABLE REAL DEL SERVIDOR
+  // 🔥 URL REAL DEL BACKEND
   const API = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "");
-
-  if (!API) console.error("❌ Falta NEXT_PUBLIC_BACKEND_URL en Vercel");
+  if (!API) console.error("❌ Falta NEXT_PUBLIC_BACKEND_URL");
 
   const hoy = new Date().toISOString().split("T")[0];
 
@@ -20,55 +19,57 @@ export default function TurnosConfirmados() {
     return `${d}/${m}/${y}`;
   };
 
-  // --------------------------
-  // 🔥 Cargar turnos confirmados
-  // --------------------------
+  // -------------------------------------------
+  // 🔥 Cargar confirmados (filtrando por fecha)
+  // -------------------------------------------
   const cargarTurnos = async () => {
     try {
       setLoading(true);
+      setError(null);
 
-      const res = await fetch(
-        `${API}/api/turnos/mis/confirmados?fecha=${hoy}`,
-        {
-          credentials: "include",
-        }
-      );
+      // Backend devuelve TODOS → filtramos en front
+      const res = await fetch(`${API}/api/turnos/mis/confirmados`, {
+        credentials: "include",
+      });
 
       if (!res.ok) throw new Error("No se pudieron cargar los turnos confirmados");
 
       const data = await res.json();
-      setTurnos(data);
+
+      // Filtrar turnos DEL DÍA (el backend no filtra)
+      const delDia = data.filter((t: any) => t.fecha === hoy);
+
+      setTurnos(delDia);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Error cargando turnos");
     } finally {
       setLoading(false);
     }
   };
 
-  // --------------------------
-  // 🔥 Inicial + Socket.IO (Render)
-  // --------------------------
+  // -------------------------------------------
+  // 🔥 Inicial + Sockets
+  // -------------------------------------------
   useEffect(() => {
     cargarTurnos();
 
-    socket.on("turno:confirmado", cargarTurnos);
-    socket.on("turno:eliminado", cargarTurnos);
-    socket.on("turno:provisional", cargarTurnos);
+    const eventos = ["turno:confirmado", "turno:eliminado", "turno:provisional"];
+
+    eventos.forEach((ev) => socket.on(ev, cargarTurnos));
 
     return () => {
-      socket.off("turno:confirmado", cargarTurnos);
-      socket.off("turno:eliminado", cargarTurnos);
-      socket.off("turno:provisional", cargarTurnos);
+      eventos.forEach((ev) => socket.off(ev, cargarTurnos));
     };
   }, []);
 
-  // --------------------------
-  // UI
-  // --------------------------
+  // -------------------------------------------
+  // 🔥 UI
+  // -------------------------------------------
 
   if (loading) return <p className="text-gray-200 p-6">Cargando turnos…</p>;
   if (error) return <p className="text-red-400 p-6">{error}</p>;
-  if (!turnos.length) return <p className="text-gray-200 p-6">No hay turnos confirmados.</p>;
+  if (!turnos.length)
+    return <p className="text-gray-200 p-6">No hay turnos confirmados para hoy.</p>;
 
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">

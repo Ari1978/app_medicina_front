@@ -47,13 +47,15 @@ export default function PanelSuperAdmin() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // 🔥 Protección obligatoria
+  // =====================================================
+  // 🔥 PROTECCIÓN REAL DE ROL
+  // =====================================================
   useEffect(() => {
     if (!loading) {
       if (!user) {
         router.replace("/login");
       } else if (user.role !== "admin" && user.role !== "superadmin") {
-        router.replace("/"); // o "/PanelUsuario", como quieras
+        router.replace("/");
       }
     }
   }, [loading, user, router]);
@@ -72,33 +74,87 @@ export default function PanelSuperAdmin() {
         Panel de Administración
       </h1>
 
-      {/* Gestión de Usuarios */}
+      {/* =====================================================
+          🔵 SECCIÓN: Gestión de Usuarios
+      ===================================================== */}
       <section className="mb-8 w-full max-w-5xl">
         <h2 className="text-2xl font-semibold text-white mb-4 text-center">Usuarios</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          <OptionCard title="Ver total users" description="Usuarios, admin y staff" href="/adminStaffUser" />
-          <OptionCard title="Agregar Staff" description="Registrar y asignar rol" href="/admin/usuarios/nuevo" />
-          <OptionCard title="Agregar usuarios" description="Agregar a DB" href="/admin/usuarios/importar" />
+
+          <OptionCard
+            title="Todos los Usuarios"
+            description="Ver empresas, staff y admins"
+            href="/admin/usuarios"
+          />
+
+          <OptionCard
+            title="Agregar Staff"
+            description="Crear staff o admin"
+            href="/admin/staff/nuevo"
+          />
+
+          <OptionCard
+            title="Importar Autorizados"
+            description="Cargar usuarios desde Excel"
+            href="/admin/usuarios/importar-autorizados"
+          />
         </div>
       </section>
 
-      {/* Gestión de Turnos */}
+      {/* =====================================================
+          🔵 SECCIÓN: Gestión de Turnos
+      ===================================================== */}
       <section className="mb-8 w-full max-w-5xl">
         <h2 className="text-2xl font-semibold text-white mb-4 text-center">Turnos</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          <OptionCard title="Ver Turnos" description="Todos los turnos registrados" href="/admin/turnos" />
-          <OptionCard title="Asignar Turnos" description="Programar nuevos turnos" href="/admin/turnos/nuevo" />
-          <OptionCard title="Evaluaciones Especiales" description="Turnos de exámenes especiales" href="/admin/evaluaciones" />
+
+          <OptionCard
+            title="Ver Turnos"
+            description="Turnos confirmados del sistema"
+            href="/admin/turnos"
+          />
+
+          <OptionCard
+            title="Asignar Turnos"
+            description="Crear turnos manualmente"
+            href="/admin/turnos/nuevo"
+          />
+
+          <OptionCard
+            title="Evaluaciones Especiales"
+            description="Turnos complejos o excepcionales"
+            href="/admin/turnos/especiales"
+          />
         </div>
       </section>
 
-      {/* Facturación y Consultas */}
+      {/* =====================================================
+          🔵 SECCIÓN: Facturación y Consultas
+      ===================================================== */}
       <section className="mb-8 w-full max-w-5xl">
-        <h2 className="text-2xl font-semibold text-white mb-4 text-center">Facturación y Consultas</h2>
+        <h2 className="text-2xl font-semibold text-white mb-4 text-center">
+          Facturación y Consultas
+        </h2>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          <OptionCard title="Ver Facturas" description="Historial de facturación" href="/admin/facturas" />
-          <OptionCard title="Consultas y Reclamos" description="Gestión de consultas de clientes" href="/admin/consultas" />
-          <OptionCard title="Reportes" description="Generar reportes estadísticos" href="/admin/reportes" />
+
+          <OptionCard
+            title="Facturación"
+            description="Facturas y cierres mensuales"
+            href="/admin/facturacion"
+          />
+
+          <OptionCard
+            title="Consultas"
+            description="Mensajes y reclamos"
+            href="/admin/consultas"
+          />
+
+          <OptionCard
+            title="Reportes"
+            description="Estadísticas y métricas"
+            href="/admin/reportes"
+          />
         </div>
       </section>
     </div>

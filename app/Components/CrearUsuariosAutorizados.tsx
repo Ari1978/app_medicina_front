@@ -24,8 +24,8 @@ export default function UsuarioAutorizadoForm() {
   const [excelMsg, setExcelMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // === 🔥 BACKEND CORRECTO (Render) ===
-  const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
+  // Backend ASMEL real (nunca undefined)
+  const API_URL: string = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000").replace(/\/$/, "");
 
   // ------------------ INPUTS ------------------
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,11 +47,11 @@ export default function UsuarioAutorizadoForm() {
     }
 
     setLoading(true);
+
     try {
       const res = await fetch(`${API_URL}/api/usuario-autorizado/crear`, {
         method: "POST",
         credentials: "include",
-        redirect: "follow",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           empresa: empresa.trim(),
@@ -62,7 +62,6 @@ export default function UsuarioAutorizadoForm() {
       });
 
       const data = await res.json().catch(() => ({}));
-
       if (!res.ok) throw new Error(data.message || "Error al crear usuario");
 
       setMsg({ type: "ok", text: "Usuario autorizado agregado correctamente." });
@@ -93,6 +92,7 @@ export default function UsuarioAutorizadoForm() {
     }
 
     setLoading(true);
+
     try {
       const formData = new FormData();
       formData.append("file", excelFile);
@@ -100,7 +100,6 @@ export default function UsuarioAutorizadoForm() {
       const res = await fetch(`${API_URL}/api/usuario-autorizado/importar`, {
         method: "POST",
         credentials: "include",
-        redirect: "follow",
         body: formData,
       });
 
@@ -116,7 +115,6 @@ export default function UsuarioAutorizadoForm() {
     }
   };
 
-  // ------------------ UI ------------------
   return (
     <div className="max-w-3xl mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg space-y-6">
       <h2 className="text-2xl font-bold mb-4 text-center">Agregar Usuario Autorizado</h2>
@@ -140,13 +138,17 @@ export default function UsuarioAutorizadoForm() {
           onChange={handleChange}
           className="p-3 rounded bg-gray-800 text-white"
         />
+
         <input
           name="cuit"
           placeholder="CUIT (11 dígitos)"
           value={form.cuit}
-          onChange={handleChange}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, cuit: e.target.value.replace(/\D/g, "") }))
+          }
           className="p-3 rounded bg-gray-800 text-white"
         />
+
         <input
           name="contactoNombre"
           placeholder="Nombre del contacto"
@@ -154,6 +156,7 @@ export default function UsuarioAutorizadoForm() {
           onChange={handleChange}
           className="p-3 rounded bg-gray-800 text-white"
         />
+
         <input
           name="contactoEmail"
           placeholder="Email del contacto"

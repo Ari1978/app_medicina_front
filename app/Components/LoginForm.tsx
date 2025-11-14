@@ -21,14 +21,18 @@ export default function LoginForm() {
     setError(null);
 
     try {
+      const id = identifier.trim();
+
       if (userType === "user") {
-        await loginUser(identifier.trim(), password);
+        // CUIT solo números
+        await loginUser(id.replace(/\D/g, ""), password);
       } else if (userType === "staff") {
-        await loginStaff(identifier.trim(), password);
+        await loginStaff(id, password);
       } else {
-        await loginAdmin(identifier.trim(), password);
+        await loginAdmin(id, password);
       }
-      // Redirección automática desde AuthContext
+
+      // Redirección automática en AuthContext
     } catch (err: any) {
       console.error("❌ Error login:", err);
 
@@ -62,7 +66,7 @@ export default function LoginForm() {
           </select>
         </div>
 
-        {/* CUIT o Username */}
+        {/* Identificador */}
         <div>
           <label className="block mb-1 font-medium">
             {userType === "user" ? "CUIT" : "Usuario (Username)"}
@@ -71,12 +75,18 @@ export default function LoginForm() {
             type="text"
             className="w-full border p-2 rounded bg-gray-800 text-white"
             value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
+            onChange={(e) =>
+              setIdentifier(
+                userType === "user"
+                  ? e.target.value.replace(/\D/g, "") // solo números
+                  : e.target.value // texto libre para staff/admin
+              )
+            }
             required
           />
         </div>
 
-        {/* Password */}
+        {/* Contraseña */}
         <div>
           <label className="block mb-1 font-medium">Contraseña</label>
           <input

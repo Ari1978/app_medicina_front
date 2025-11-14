@@ -54,10 +54,19 @@ export default function PanelUsuario() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // 🚫 Si no hay usuario, redirigir
+  // 🔐 Protección de empresa (User)
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/login");
+    if (!loading) {
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
+
+      // Si no es "user", redirigir al panel correspondiente
+      if (user.role !== "user") {
+        if (user.role === "staff") router.replace("/panelStaff");
+        if (user.role === "admin" || user.role === "superadmin") router.replace("/panelAdmin");
+      }
     }
   }, [loading, user, router]);
 
@@ -69,10 +78,16 @@ export default function PanelUsuario() {
     );
   }
 
+  const nombreMostrar =
+    user.nombre ||
+    user.contacto?.nombre ||
+    user.empresa ||
+    "Usuario";
+
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black px-5 py-15 items-center">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black px-5 py-16 items-center">
       <h1 className="text-3xl font-bold text-white mb-6 mt-2 text-center">
-        Bienvenido {user.nombre || user.contacto?.nombre || "Usuario"}
+        Bienvenido {nombreMostrar}
       </h1>
 
       <section className="mb-8 w-full max-w-5xl">
@@ -84,10 +99,10 @@ export default function PanelUsuario() {
           <OptionCard title="Mis Turnos" description="Turnos confirmados" href="/turnosList" />
           <OptionCard title="Generar Turnos" description="Pre-ocupacionales, periódicos y otros" href="/turnos" />
           <OptionCard title="Evaluaciones especiales" description="Asesoramiento / presupuesto" href="/asesorMedico" />
-          <OptionCard title="Reportes" description="Resultados médicos" href="" />
-          <OptionCard title="Presupuestos" description="Inicie su gestión" href="" />
-          <OptionCard title="Soporte en linea" description="Contactá al equipo ASMEL vía chat o WhatsApp." href="" />
-          <OptionCard title="Facturación" description="Descargar mis facturas" href="" />
+          <OptionCard title="Reportes" description="Resultados médicos" href="#" />
+          <OptionCard title="Presupuestos" description="Inicie su gestión" href="#" />
+          <OptionCard title="Soporte en línea" description="Chat / WhatsApp" href="#" />
+          <OptionCard title="Facturación" description="Descargar mis facturas" href="#" />
         </div>
       </section>
     </div>

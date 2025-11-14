@@ -2,25 +2,33 @@
 
 import { FaShoppingCart } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { useCarrito } from "../Components/CarritoContext";
+import { useCarrito } from "./CarritoContext";
+import { useAuth } from "./AuthContext";
 import { useEffect, useState } from "react";
 
 export default function CarritoFlotante() {
   const { carrito } = useCarrito();
+  const { user } = useAuth();
   const router = useRouter();
 
   const [contador, setContador] = useState(0);
 
+  // ===========================
+  // CONTADOR
+  // ===========================
   useEffect(() => {
-    if (!carrito) {
+    if (!Array.isArray(carrito)) {
       setContador(0);
       return;
     }
     setContador(carrito.length);
   }, [carrito]);
 
-  // Ocultar si no hay carrito cargado aún
-  if (!carrito) return null;
+  // ===========================
+  // OCULTAR CUANDO NO CORRESPONDE
+  // ===========================
+  if (!user) return null;               // No logueado → no mostrar
+  if (user.role !== "user") return null; // Staff/Admin no usan carrito
 
   return (
     <div
@@ -39,3 +47,4 @@ export default function CarritoFlotante() {
     </div>
   );
 }
+

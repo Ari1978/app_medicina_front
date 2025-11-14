@@ -7,8 +7,6 @@ interface Turno {
   _id?: string;
   fecha: string;
   hora: string;
-  provisional?: boolean;
-  confirmado?: boolean;
   empleado: {
     nombre: string;
     apellido: string;
@@ -21,10 +19,6 @@ interface Turno {
   puesto: string;
   examenes: string[];
   motivo?: string;
-  user: string;
-  empresaId?: string;
-  creadoPor?: string;
-  creadoPorTipo?: string;
 }
 
 interface CarritoContextType {
@@ -41,83 +35,63 @@ export const CarritoProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const [carrito, setCarrito] = useState<Turno[]>([]);
 
-  // === 🔥 URL correcta desde Vercel ===
   const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL!;
-  if (!API_URL) console.error("❌ Falta NEXT_PUBLIC_BACKEND_URL en Vercel");
+  if (!API_URL) console.error("❌ Falta NEXT_PUBLIC_BACKEND_URL");
 
-  // ---------------------------
-  // Detectar cookie
-  // ---------------------------
-  const hasToken = () => {
+  const isLoggedIn = () => {
     if (typeof document === "undefined") return false;
     return (
       document.cookie.includes("asmel_token=") ||
-      document.cookie.includes("asmel_staff_token=")
+      document.cookie.includes("asmel_staff_token=") ||
+      document.cookie.includes("asmel_admin_token=")
     );
   };
 
-  // ---------------------------
-  // Cargar carrito
-  // ---------------------------
+  // =====================================================
+  // 🧺 Cargar carrito automáticamente cuando hay login
+  // =====================================================
   useEffect(() => {
-    const cargarCarrito = async () => {
-      if (!hasToken()) return;
-
-      if (!user || user.role !== "user") {
-        setCarrito([]);
-        return;
-      }
+    const cargar = async () => {
+      if (!user) return;
+      if (user.role !== "user") return;
+      if (!isLoggedIn()) return;
 
       try {
         const res = await fetch(`${API_URL}/api/carrito`, {
-          method: "GET",
           credentials: "include",
-          redirect: "follow",
-          headers: { "Content-Type": "application/json" },
         });
-
-        const data = await res.json().catch(() => []);
 
         if (!res.ok) {
           setCarrito([]);
           return;
         }
 
-        setCarrito(data);
-      } catch (err) {
-        console.error("❌ Error cargando carrito:", err);
+        const data = await res.json();
+        setCarrito(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("❌ Error cargando carrito:", e);
+        setCarrito([]);
       }
     };
 
-    cargarCarrito();
+    cargar();
   }, [user]);
 
-  // ---------------------------
-  // Agregar turno
-  // ---------------------------
+  // =====================================================
+  // ➕ AGREGAR TURNO AL CARRITO (empresa)
+  // =====================================================
   const addToCarrito = async (turno: Turno) => {
     if (!user) throw new Error("No autenticado");
-    if (user.role !== "user") throw new Error("Solo clientes pueden usar carrito");
-
-    const turnoData = {
-      ...turno,
-      user: user.id || "",
-      empresaId: user.id || "",
-      creadoPor: user.id || "",
-      creadoPorTipo: "User",
-      provisional: true,
-      confirmado: false,
-    };
+    if (user.role !== "user") throw new Error("Solo empresa puede agregar turnos");
 
     const res = await fetch(`${API_URL}/api/carrito`, {
       method: "POST",
       credentials: "include",
-      redirect: "follow",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(turnoData),
+      body: JSON.stringify(turno), // 🔥 solo manda datos del turno
     });
 
-    const data = await res.json().catch(() => ({}));
+    const data = await res.json();
 
     if (!res.ok) {
       console.error("❌ Error addToCarrito:", data);
@@ -127,64 +101,46 @@ export const CarritoProvider = ({ children }: { children: ReactNode }) => {
     setCarrito((prev) => [...prev, data]);
   };
 
-  // ---------------------------
-  // Eliminar
-  // ---------------------------
+  // =====================================================
+  // 🗑️ ELIMINAR TURNO DEL CARRITO
+  // =====================================================
   const removeFromCarrito = async (turnoId: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/carrito/${turnoId}`, {
-        method: "DELETE",
-        credentials: "include",
-        redirect: "follow",
-        headers: { "Content-Type": "application/json" },
-      });
+    const res = await fetch(`${API_URL}/api/carrito/${turnoId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
 
-      if (!res.ok) throw new Error("No se pudo eliminar el turno");
+    if (!res.ok) throw new Error("No se pudo eliminar");
 
-      setCarrito((prev) => prev.filter((t) => t._id !== turnoId));
-    } catch (err) {
-      console.error("❌ Error removeFromCarrito:", err);
-    }
+    setCarrito((prev) => prev.filter((t) => t._id !== turnoId));
   };
 
-  // ---------------------------
-  // Vaciar
-  // ---------------------------
+  // =====================================================
+  // 🧹 LIMPIAR CARRITO
+  // =====================================================
   const clearCarrito = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/carrito/clear`, {
-        method: "DELETE",
-        credentials: "include",
-        redirect: "follow",
-        headers: { "Content-Type": "application/json" },
-      });
+    const res = await fetch(`${API_URL}/api/carrito/clear`, {
+      method: "DELETE",
+      credentials: "include",
+    });
 
-      if (!res.ok) throw new Error("No se pudo vaciar el carrito");
+    if (!res.ok) throw new Error("No se pudo vaciar");
 
-      setCarrito([]);
-    } catch (err) {
-      console.error("❌ Error clearCarrito:", err);
-    }
+    setCarrito([]);
   };
 
-  // ---------------------------
-  // Confirmar
-  // ---------------------------
+  // =====================================================
+  // ✅ CONFIRMAR TODOS LOS TURNOS
+  // =====================================================
   const confirmarCarrito = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/carrito/confirmar`, {
-        method: "PUT",
-        credentials: "include",
-        redirect: "follow",
-        headers: { "Content-Type": "application/json" },
-      });
+    const res = await fetch(`${API_URL}/api/carrito/confirmar`, {
+      method: "PUT",
+      credentials: "include",
+    });
 
-      if (!res.ok) throw new Error("No se pudo confirmar");
+    if (!res.ok) throw new Error("No se pudo confirmar");
 
-      setCarrito([]);
-    } catch (err) {
-      console.error("❌ Error confirmarCarrito:", err);
-    }
+    setCarrito([]);
   };
 
   return (
@@ -204,6 +160,6 @@ export const CarritoProvider = ({ children }: { children: ReactNode }) => {
 
 export const useCarrito = () => {
   const ctx = useContext(CarritoContext);
-  if (!ctx) throw new Error("useCarrito debe usarse dentro de un CarritoProvider");
+  if (!ctx) throw new Error("useCarrito debe usarse dentro de CarritoProvider");
   return ctx;
 };

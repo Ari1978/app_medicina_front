@@ -32,7 +32,9 @@ export default function StaffNuevo() {
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // 🔥 Protección
+  // ======================================================
+  // 🔥 PROTECCIÓN REAL DEL SISTEMA ASMEL
+  // ======================================================
   useEffect(() => {
     if (!loading) {
       if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
@@ -45,18 +47,24 @@ export default function StaffNuevo() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
-    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
-  };
-
-  const togglePermiso = (perm: string) => {
     setForm((prev) => ({
       ...prev,
-      permisos: prev.permisos.includes(perm)
-        ? prev.permisos.filter((p) => p !== perm)
-        : [...prev.permisos, perm],
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
+  const togglePermiso = (permiso: string) => {
+    setForm((prev) => ({
+      ...prev,
+      permisos: prev.permisos.includes(permiso)
+        ? prev.permisos.filter((p) => p !== permiso)
+        : [...prev.permisos, permiso],
+    }));
+  };
+
+  // ======================================================
+  // 🔥 SUBMIT — Crear staff o admin
+  // ======================================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
@@ -71,43 +79,36 @@ export default function StaffNuevo() {
       return setMsg({ type: "err", text: "Seleccione al menos 1 permiso" });
     }
 
+    const base = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "");
+    if (!base) return setMsg({ type: "err", text: "Falta NEXT_PUBLIC_BACKEND_URL" });
+
+    const endpoint =
+      role === "admin" ? "/api/admin/crear-admin" : "/api/admin/crear-staff";
+
+    const payload =
+      role === "admin"
+        ? { username, password, nombre, apellido, superadmin }
+        : { username, password, nombre, apellido, permisos };
+
     setSaving(true);
+
     try {
-      // 🔥 CORRECTO PARA RENDER + VERCEL
-      const base = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "");
-
-      if (!base) {
-        throw new Error("Falta NEXT_PUBLIC_BACKEND_URL en Vercel");
-      }
-
-      const endpoint =
-        role === "admin"
-          ? "/api/admin/crear-admin"
-          : "/api/admin/crear-staff";
-
-      const payload =
-        role === "admin"
-          ? { username, password, nombre, apellido, superadmin }
-          : { username, password, nombre, apellido, permisos };
-
       const res = await fetch(`${base}${endpoint}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Error al crear usuario");
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.message || "Error al crear usuario");
 
       setMsg({
         type: "ok",
-        text:
-          role === "admin"
-            ? "Admin creado correctamente"
-            : "Staff creado correctamente",
+        text: role === "admin" ? "Admin creado correctamente" : "Staff creado correctamente",
       });
 
+      // limpiar formulario
       setForm({
         role: "",
         username: "",
@@ -145,6 +146,7 @@ export default function StaffNuevo() {
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {/* ROLE */}
         <select
           name="role"
           value={form.role}
@@ -160,6 +162,7 @@ export default function StaffNuevo() {
           </option>
         </select>
 
+        {/* DATOS */}
         <input
           name="username"
           placeholder="Usuario"
@@ -193,7 +196,7 @@ export default function StaffNuevo() {
           className="p-3 rounded bg-white/20 border border-white/30 text-white placeholder-gray-300"
         />
 
-        {/* Superadmin solo lo crea superadmin */}
+        {/* SUPERADMIN */}
         {form.role === "admin" && user.role === "superadmin" && (
           <label className="flex items-center gap-2">
             <input
@@ -206,18 +209,18 @@ export default function StaffNuevo() {
           </label>
         )}
 
-        {/* Permisos del staff */}
+        {/* PERMISOS STAFF */}
         {form.role === "staff" && (
           <div className="bg-white/10 p-3 rounded border border-white/20">
             <p className="mb-2 font-semibold">Permisos del Staff:</p>
-            {PERMISOS.map((p) => (
-              <label key={p} className="flex items-center gap-2 mb-1">
+            {PERMISOS.map((perm) => (
+              <label key={perm} className="flex items-center gap-2 mb-1">
                 <input
                   type="checkbox"
-                  checked={form.permisos.includes(p)}
-                  onChange={() => togglePermiso(p)}
+                  checked={form.permisos.includes(perm)}
+                  onChange={() => togglePermiso(perm)}
                 />
-                {p.toUpperCase()}
+                {perm.toUpperCase()}
               </label>
             ))}
           </div>

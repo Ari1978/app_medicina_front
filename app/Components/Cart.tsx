@@ -10,8 +10,18 @@ export default function CartPage() {
   const { user } = useAuth();
   const { carrito, removeFromCarrito, clearCarrito, confirmarCarrito } = useCarrito();
 
+  // --------------------------------------
+  // PROTEGER RUTA → SOLO EMPRESAS (USER)
+  // --------------------------------------
   useEffect(() => {
-    if (!user) router.push("/login");
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+
+    if (user.role !== "user") {
+      router.replace("/panelStaff");
+    }
   }, [user, router]);
 
   if (!carrito) return null;
@@ -41,22 +51,40 @@ export default function CartPage() {
                 className="bg-white shadow rounded p-4 flex justify-between items-start"
               >
                 <div>
-                  <p><strong>Empleado:</strong> {turno.empleado.nombre} {turno.empleado.apellido}</p>
-                  <p><strong>DNI:</strong> {turno.empleado.dni}</p>
-                  <p><strong>Puesto:</strong> {turno.puesto}</p>
-                  <p><strong>Exámenes:</strong> {turno.examenes?.join(", ")}</p>
-                  <p><strong>Fecha:</strong> {turno.fecha}</p>
-                  <p><strong>Hora:</strong> {turno.hora}</p>
+                  <p>
+                    <strong>Empleado:</strong> {turno.empleado.nombre}{" "}
+                    {turno.empleado.apellido}
+                  </p>
+                  <p>
+                    <strong>DNI:</strong> {turno.empleado.dni}
+                  </p>
+                  <p>
+                    <strong>Puesto:</strong> {turno.puesto}
+                  </p>
+                  <p>
+                    <strong>Exámenes:</strong> {turno.examenes?.join(", ")}
+                  </p>
+                  <p>
+                    <strong>Fecha:</strong> {turno.fecha}
+                  </p>
+                  <p>
+                    <strong>Hora:</strong> {turno.hora}
+                  </p>
 
                   {turno.motivo && (
-                    <p><strong>Motivo:</strong> {turno.motivo}</p>
+                    <p>
+                      <strong>Motivo:</strong> {turno.motivo}
+                    </p>
                   )}
                 </div>
 
+                {/* Eliminar turno */}
                 <button
                   onClick={async () => {
                     try {
-                      if (turno._id) await removeFromCarrito(turno._id);
+                      if (turno._id) {
+                        await removeFromCarrito(turno._id);
+                      }
                     } catch (err) {
                       console.error("❌ Error eliminando turno:", err);
                     }
@@ -69,7 +97,9 @@ export default function CartPage() {
             ))}
           </div>
 
+          {/* ACCIONES */}
           <div className="flex justify-between mt-6">
+            {/* Vaciar */}
             <button
               onClick={async () => {
                 try {
@@ -83,6 +113,7 @@ export default function CartPage() {
               Vaciar Carrito
             </button>
 
+            {/* Confirmar */}
             <button
               onClick={async () => {
                 try {
@@ -90,7 +121,7 @@ export default function CartPage() {
 
                   alert("✅ Turnos confirmados correctamente");
 
-                  // 🔥 ES OBLIGATORIO para sincronizar disponibilidad en producción
+                  // 🔥 Importante: recarga disponibilidad
                   router.replace("/turnos");
                 } catch (err) {
                   console.error("❌ Error confirmando turnos:", err);

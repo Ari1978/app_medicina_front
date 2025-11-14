@@ -6,21 +6,15 @@ import { useRouter, usePathname } from "next/navigation";
 type Role = "user" | "staff" | "admin" | "superadmin";
 
 interface User {
-  _id?: string;
-  id?: string;
+  _id: string;
+  id: string;
   nombre?: string;
   apellido?: string;
   cuit?: string;
   email?: string;
   username?: string;
-  role: Role;
   permisos?: string[];
-  empresa?: string;
-  contacto?: {
-    nombre?: string;
-    email?: string;
-    telefono?: string;
-  };
+  role: Role;
 }
 
 interface AuthContextType {
@@ -41,107 +35,101 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
   const base = process.env.NEXT_PUBLIC_BACKEND_URL!;
-  if (!base) console.error("❌ Falta NEXT_PUBLIC_BACKEND_URL");
+  if (!base) console.error("❌ Falta NEXT_PUBLIC_BACKEND_URL en .env");
 
   // ----------------------------------------------------
-  // 🔧 Normalize seguro — NO rompe role, ID, ni permisos
+  // NORMALIZAR USUARIO (fix id / _id)
   // ----------------------------------------------------
-  const normalizeUser = (u: any): User => {
-    if (!u) return null as any;
-
-    return {
-      _id: u._id ?? u.id ?? null,
-      id: u._id ?? u.id ?? null,
-      nombre: u.nombre,
-      apellido: u.apellido,
-      cuit: u.cuit,
-      email: u.email,
-      username: u.username,
-      role: u.role, // ← NO TOCAR
-      permisos: u.permisos || [],
-      empresa: u.empresa,
-      contacto: u.contacto,
-    };
-  };
+  const normalizeUser = (u: any): User => ({
+    ...u,
+    _id: u._id || u.id,
+    id: u._id || u.id,
+  });
 
   // ----------------------------------------------------
-  // 🔐 LOGIN GENÉRICO
+  // LOGIN GENERAL
   // ----------------------------------------------------
-  const loginRequest = async (url: string, body: any) => {
+  const loginRequest = async (endpoint: string, body: any) => {
     setLoading(true);
     try {
-      const res = await fetch(url, {
+      const res = await fetch(`${base}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ← IMPORTANTE
+        credentials: "include", // 🔥 importantísimo
         body: JSON.stringify(body),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Credenciales inválidas");
 
-      if (!data.user?.role) throw new Error("Usuario inválido");
+      if (!res.ok) throw new Error(data.message || "Credenciales inválidas");
 
       const u = normalizeUser(data.user);
       setUser(u);
 
       redirectByRole(u.role, u.permisos);
+    } catch (err) {
+      console.error("❌ Error login:", err);
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  const loginUser = async (cuit: string, password: string) =>
-    loginRequest(`${base}/api/user/login`, { cuit, password });
+  // ----------------------------------------------------
+  // LOGINs por tipo
+  // ----------------------------------------------------
+  const loginUser  = async (cuit: string, password: string) =>
+    loginRequest(`/api/user/login`, { cuit, password });
 
   const loginStaff = async (username: string, password: string) =>
-    loginRequest(`${base}/api/staff/login`, { username, password });
+    loginRequest(`/api/staff/login`, { username, password });
 
   const loginAdmin = async (username: string, password: string) =>
-    loginRequest(`${base}/api/admin/login`, { username, password });
+    loginRequest(`/api/admin/login`, { username, password });
 
   // ----------------------------------------------------
-  // 🔓 LOGOUT
+  // LOGOUT
   // ----------------------------------------------------
   const logout = async () => {
     if (!user) return;
 
-    const logoutURL =
+    const url =
       user.role === "user"
-        ? `${base}/api/user/logout`
+        ? `/api/user/logout`
         : user.role === "staff"
-        ? `${base}/api/staff/logout`
-        : `${base}/api/admin/logout`;
+        ? `/api/staff/logout`
+        : `/api/admin/logout`;
 
-    await fetch(logoutURL, { method: "POST", credentials: "include" });
+    await fetch(`${base}${url}`, {
+      method: "POST",
+      credentials: "include",
+    });
 
     setUser(null);
     router.replace("/login");
   };
 
   // ----------------------------------------------------
-  // 🔄 AUTOLOGIN POR COOKIE
+  // AUTOLOGIN (al refrescar el navegador)
   // ----------------------------------------------------
   useEffect(() => {
-    const checkSession = async () => {
+    const autologin = async () => {
       try {
-        setLoading(true);
-
-        const endpoints = [
-          `${base}/api/user/me`,
-          `${base}/api/staff/me`,
-          `${base}/api/admin/me`,
+        const candidates = [
+          `/api/user/me`,
+          `/api/staff/me`,
+          `/api/admin/me`,
         ];
 
-        for (const endpoint of endpoints) {
-          const res = await fetch(endpoint, { credentials: "include" });
+        for (const endpoint of candidates) {
+          const res = await fetch(`${base}${endpoint}`, {
+            credentials: "include",
+          });
 
           if (res.ok) {
             const data = await res.json();
-
-            if (!data.user?.role) continue;
-
             const u = normalizeUser(data.user);
+
             setUser(u);
 
             if (pathname === "/login") {
@@ -154,50 +142,57 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         setUser(null);
-      } catch {
+      } catch (error) {
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
 
-    checkSession();
+    autologin();
   }, []);
 
   // ----------------------------------------------------
-  // ➡️ REDIRECCIÓN POR ROL Y PERMISOS
+  // REDIRECCIÓN POR ROL
   // ----------------------------------------------------
   const redirectByRole = (role: Role, permisos?: string[]) => {
-    if (role === "user") {
-      router.replace("/PanelUsuario");
-      return;
-    }
+    if (role === "user") return router.replace("/PanelUsuario");
 
     if (role === "staff") {
-      if (permisos?.includes("examenes")) router.replace("/agendaTurno");
-      else if (permisos?.includes("marketing")) router.replace("/panelMarketing");
-      else if (permisos?.includes("rrhh")) router.replace("/panelRRHH");
-      else if (permisos?.includes("saludMental")) router.replace("/panelSaludMental");
-      else if (permisos?.includes("turnos")) router.replace("/panelTurnos");
-      else if (permisos?.includes("visitas")) router.replace("/panelVisitas");
-      else if (permisos?.includes("contaduria")) router.replace("/panelContaduria");
-      else if (permisos?.includes("medico")) router.replace("/panelMedico");
-      else router.replace("/panelStaff");
-      return;
+      if (permisos?.includes("examenes")) return router.replace("/agendaTurno");
+      if (permisos?.includes("marketing")) return router.replace("/panelMarketing");
+      if (permisos?.includes("rrhh")) return router.replace("/panelRRHH");
+      if (permisos?.includes("saludMental")) return router.replace("/panelSaludMental");
+      if (permisos?.includes("turnos")) return router.replace("/panelTurnos");
+      if (permisos?.includes("visitas")) return router.replace("/panelVisitas");
+      if (permisos?.includes("contaduria")) return router.replace("/panelContaduria");
+      if (permisos?.includes("medico")) return router.replace("/panelMedico");
+      return router.replace("/panelStaff");
     }
 
-    router.replace("/panelSuperAdmin");
+    // Admin / Superadmin
+    return router.replace("/panelSuperAdmin");
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, loginUser, loginStaff, loginAdmin, logout }}
+      value={{
+        user,
+        loading,
+        loginUser,
+        loginStaff,
+        loginAdmin,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
 
+// ----------------------------------------------------
+// HOOK
+// ----------------------------------------------------
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth debe usarse dentro de AuthProvider");
