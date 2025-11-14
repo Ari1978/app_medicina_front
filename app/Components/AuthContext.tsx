@@ -1,179 +1,186 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 type Role = "user" | "staff" | "admin" | "superadmin";
 
-interface User {
+/* ============================================================
+   🟦 USER → TIPO COMPLETO DEVUELTO POR TU BACKEND
+   ============================================================ */
+export interface User {
   _id: string;
-  id: string;
+
+  // Empresa (solo para usuarios CUIT)
+  empresa?: string;
+
+  // Datos personales
   nombre?: string;
   apellido?: string;
   cuit?: string;
+
+  // Email general
   email?: string;
-  username?: string;
-  permisos?: string[];
+
+  // Contacto usado por empresas
+  contacto?: {
+    nombre?: string;
+    email?: string;
+    telefono?: string;
+  };
+
+  // Rol
   role: Role;
+
+  // Permisos del STAFF
+  permisos?: string[];
 }
 
+/* ============================================================
+   📌 CONTEXTO
+   ============================================================ */
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+
   loginUser: (cuit: string, password: string) => Promise<void>;
   loginStaff: (username: string, password: string) => Promise<void>;
   loginAdmin: (username: string, password: string) => Promise<void>;
+
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/* ============================================================
+   🔥 URL GLOBAL DEL BACKEND
+   ============================================================ */
+const API = (process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "http://localhost:4000"
+).replace(/\/$/, "");
+
+/* ============================================================
+   🟩 PROVIDER
+   ============================================================ */
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
-  const base = process.env.NEXT_PUBLIC_BACKEND_URL!;
-  if (!base) console.error("❌ Falta NEXT_PUBLIC_BACKEND_URL en .env");
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // ----------------------------------------------------
-  // NORMALIZAR USUARIO (fix id / _id)
-  // ----------------------------------------------------
-  const normalizeUser = (u: any): User => ({
-    ...u,
-    _id: u._id || u.id,
-    id: u._id || u.id,
-  });
-
-  // ----------------------------------------------------
-  // LOGIN GENERAL
-  // ----------------------------------------------------
-  const loginRequest = async (endpoint: string, body: any) => {
-    setLoading(true);
+  /* ============================================================
+     🔥 Cargar sesión automáticamente al entrar
+     ============================================================ */
+  const checkSession = async () => {
     try {
-      const res = await fetch(`${base}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // 🔥 importantísimo
-        body: JSON.stringify(body),
+      const res = await fetch(`${API}/api/user/me`, {
+        credentials: "include",
       });
 
+      if (!res.ok) {
+        setUser(null);
+        return;
+      }
+
       const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || "Credenciales inválidas");
-
-      const u = normalizeUser(data.user);
-      setUser(u);
-
-      redirectByRole(u.role, u.permisos);
-    } catch (err) {
-      console.error("❌ Error login:", err);
-      throw err;
-    } finally {
-      setLoading(false);
+      setUser(data.user || null);
+    } catch {
+      setUser(null);
     }
   };
 
-  // ----------------------------------------------------
-  // LOGINs por tipo
-  // ----------------------------------------------------
-  const loginUser  = async (cuit: string, password: string) =>
-    loginRequest(`/api/user/login`, { cuit, password });
+  /* ============================================================
+     ⏳ Carga inicial
+     ============================================================ */
+  useEffect(() => {
+    checkSession().finally(() => setLoading(false));
+  }, []);
 
-  const loginStaff = async (username: string, password: string) =>
-    loginRequest(`/api/staff/login`, { username, password });
-
-  const loginAdmin = async (username: string, password: string) =>
-    loginRequest(`/api/admin/login`, { username, password });
-
-  // ----------------------------------------------------
-  // LOGOUT
-  // ----------------------------------------------------
-  const logout = async () => {
-    if (!user) return;
-
-    const url =
-      user.role === "user"
-        ? `/api/user/logout`
-        : user.role === "staff"
-        ? `/api/staff/logout`
-        : `/api/admin/logout`;
-
-    await fetch(`${base}${url}`, {
+  /* ============================================================
+     🔐 LOGIN USER (empresa)
+     ============================================================ */
+  const loginUser = async (cuit: string, password: string) => {
+    const res = await fetch(`${API}/api/user/login`, {
       method: "POST",
       credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cuit, password }),
     });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || "Error en login");
+
+    setUser(data.user);
+
+    router.replace("/panelUsuario");
+  };
+
+  /* ============================================================
+     🔐 LOGIN STAFF
+     ============================================================ */
+  const loginStaff = async (username: string, password: string) => {
+    const res = await fetch(`${API}/api/staff/login`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || "Error en login staff");
+
+    setUser(data.user);
+
+    router.replace("/panelStaff");
+  };
+
+  /* ============================================================
+     🔐 LOGIN ADMIN / SUPERADMIN
+     ============================================================ */
+  const loginAdmin = async (username: string, password: string) => {
+    const res = await fetch(`${API}/api/admin/login`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || "Error en login admin");
+
+    setUser(data.user);
+
+    router.replace("/panelSuperAdmin");
+  };
+
+  /* ============================================================
+     🚪 LOGOUT
+     ============================================================ */
+  const logout = async () => {
+    try {
+      await fetch(`${API}/api/user/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {}
 
     setUser(null);
     router.replace("/login");
   };
 
-  // ----------------------------------------------------
-  // AUTOLOGIN (al refrescar el navegador)
-  // ----------------------------------------------------
-  useEffect(() => {
-    const autologin = async () => {
-      try {
-        const candidates = [
-          `/api/user/me`,
-          `/api/staff/me`,
-          `/api/admin/me`,
-        ];
-
-        for (const endpoint of candidates) {
-          const res = await fetch(`${base}${endpoint}`, {
-            credentials: "include",
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            const u = normalizeUser(data.user);
-
-            setUser(u);
-
-            if (pathname === "/login") {
-              redirectByRole(u.role, u.permisos);
-            }
-
-            setLoading(false);
-            return;
-          }
-        }
-
-        setUser(null);
-      } catch (error) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    autologin();
-  }, []);
-
-  // ----------------------------------------------------
-  // REDIRECCIÓN POR ROL
-  // ----------------------------------------------------
-  const redirectByRole = (role: Role, permisos?: string[]) => {
-    if (role === "user") return router.replace("/PanelUsuario");
-
-    if (role === "staff") {
-      if (permisos?.includes("examenes")) return router.replace("/agendaTurno");
-      if (permisos?.includes("marketing")) return router.replace("/panelMarketing");
-      if (permisos?.includes("rrhh")) return router.replace("/panelRRHH");
-      if (permisos?.includes("saludMental")) return router.replace("/panelSaludMental");
-      if (permisos?.includes("turnos")) return router.replace("/panelTurnos");
-      if (permisos?.includes("visitas")) return router.replace("/panelVisitas");
-      if (permisos?.includes("contaduria")) return router.replace("/panelContaduria");
-      if (permisos?.includes("medico")) return router.replace("/panelMedico");
-      return router.replace("/panelStaff");
-    }
-
-    // Admin / Superadmin
-    return router.replace("/panelSuperAdmin");
-  };
-
+  /* ============================================================
+     RETURN
+     ============================================================ */
   return (
     <AuthContext.Provider
       value={{
@@ -190,9 +197,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// ----------------------------------------------------
-// HOOK
-// ----------------------------------------------------
+/* ============================================================
+   🧩 HOOK
+   ============================================================ */
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth debe usarse dentro de AuthProvider");

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface UsuarioForm {
   empresa: string;
@@ -10,7 +11,9 @@ interface UsuarioForm {
   password: string;
 }
 
-export default function UsuarioAutorizadoForm() {
+export default function CrearUsuariosAutorizados() {
+  const router = useRouter();
+
   const [form, setForm] = useState<UsuarioForm>({
     empresa: "",
     cuit: "",
@@ -24,15 +27,18 @@ export default function UsuarioAutorizadoForm() {
   const [excelMsg, setExcelMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Backend ASMEL real (nunca undefined)
-  const API_URL: string = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000").replace(/\/$/, "");
+  const API_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000").replace(/\/$/, "");
 
-  // ------------------ INPUTS ------------------
+  // ----------------------------------------------------------
+  // INPUTS
+  // ----------------------------------------------------------
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ------------------ CREAR USUARIO ------------------
+  // ----------------------------------------------------------
+  // CREAR USUARIO
+  // ----------------------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
@@ -56,15 +62,24 @@ export default function UsuarioAutorizadoForm() {
         body: JSON.stringify({
           empresa: empresa.trim(),
           cuit: cuit.trim(),
-          contacto: { nombre: contactoNombre.trim(), email: contactoEmail.trim() },
+          contacto: {
+            nombre: contactoNombre.trim(),
+            email: contactoEmail.trim(),
+          },
           password,
         }),
       });
 
+      // ⛔ SI CADUCA SESIÓN → REDIRIGIR
+      if (res.status === 401) {
+        router.replace("/login");
+        return;
+      }
+
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Error al crear usuario");
 
-      setMsg({ type: "ok", text: "Usuario autorizado agregado correctamente." });
+      setMsg({ type: "ok", text: "Usuario autorizado creado correctamente." });
 
       setForm({
         empresa: "",
@@ -80,7 +95,9 @@ export default function UsuarioAutorizadoForm() {
     }
   };
 
-  // ------------------ EXCEL ------------------
+  // ----------------------------------------------------------
+  // IMPORTAR EXCEL
+  // ----------------------------------------------------------
   const handleExcelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setExcelFile(e.target.files?.[0] || null);
     setExcelMsg(null);
@@ -103,6 +120,12 @@ export default function UsuarioAutorizadoForm() {
         body: formData,
       });
 
+      // ⛔ SESIÓN EXPIRADA → LOGIN
+      if (res.status === 401) {
+        router.replace("/login");
+        return;
+      }
+
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Error al importar Excel");
 
@@ -115,6 +138,9 @@ export default function UsuarioAutorizadoForm() {
     }
   };
 
+  // ----------------------------------------------------------
+  // UI
+  // ----------------------------------------------------------
   return (
     <div className="max-w-3xl mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg space-y-6">
       <h2 className="text-2xl font-bold mb-4 text-center">Agregar Usuario Autorizado</h2>
@@ -122,11 +148,7 @@ export default function UsuarioAutorizadoForm() {
       {/* FORMULARIO */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         {msg && (
-          <p
-            className={`p-2 rounded text-center ${
-              msg.type === "ok" ? "bg-green-700" : "bg-red-700"
-            }`}
-          >
+          <p className={`p-2 rounded text-center ${msg.type === "ok" ? "bg-green-700" : "bg-red-700"}`}>
             {msg.text}
           </p>
         )}
@@ -143,9 +165,7 @@ export default function UsuarioAutorizadoForm() {
           name="cuit"
           placeholder="CUIT (11 dígitos)"
           value={form.cuit}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, cuit: e.target.value.replace(/\D/g, "") }))
-          }
+          onChange={(e) => setForm((f) => ({ ...f, cuit: e.target.value.replace(/\D/g, "") }))}
           className="p-3 rounded bg-gray-800 text-white"
         />
 
@@ -178,11 +198,7 @@ export default function UsuarioAutorizadoForm() {
       {/* IMPORTAR EXCEL */}
       <div className="flex flex-col gap-3">
         {excelMsg && (
-          <p
-            className={`p-2 rounded text-center ${
-              excelMsg.type === "ok" ? "bg-green-700" : "bg-red-700"
-            }`}
-          >
+          <p className={`p-2 rounded text-center ${excelMsg.type === "ok" ? "bg-green-700" : "bg-red-700"}`}>
             {excelMsg.text}
           </p>
         )}

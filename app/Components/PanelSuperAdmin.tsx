@@ -96,7 +96,7 @@ export default function PanelSuperAdmin() {
           <OptionCard
             title="Importar Autorizados"
             description="Cargar usuarios desde Excel"
-            href="/admin/usuarios/importar-autorizados"
+            href="/crearUsuarios"
           />
         </div>
       </section>
