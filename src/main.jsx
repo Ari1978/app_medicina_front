@@ -27,7 +27,7 @@ import SuperAdminDashboard from "./pages/dashboard/SuperAdminDashboard.jsx";
 import EmpresaGuard from "./routes/guards/EmpresaGuard.jsx";
 import StaffGuard from "./routes/guards/StaffGuard.jsx";
 import AdminGuard from "./routes/guards/AdminGuard.jsx";
-import SuperAdminGuard from "./routes/guards/SuperadminGuard.jsx";
+import SuperAdminGuard from "./routes/guards/SuperAdminGuard.jsx";
 
 //
 import CrearAdmin from "./pages/dashboard/superadmin/CrearAdmin.jsx";
