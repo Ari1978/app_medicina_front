@@ -29,7 +29,7 @@ export default function CrearEmpresa() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form), // <--- ahora sí todo correcto
+        body: JSON.stringify(form),
       });
 
       const data = await res.json();
@@ -47,9 +47,9 @@ export default function CrearEmpresa() {
   };
 
   return (
-    <div className="min-h-screen p-6 text-white bg-slate-900">
-      <Paper shadow="md" p="xl" radius="lg" className="max-w-xl mx-auto">
-        <Title order={2} className="mb-6 text-center">
+    <div className="overflow-y-auto h-[calc(100vh-80px)] p-4 sm:p-6 md:p-10 text-white">
+      <Paper shadow="md" p="xl" radius="lg" className="max-w-xl mx-auto bg-slate-800">
+        <Title order={2} className="mb-6 text-center text-white">
           Crear Empresa
         </Title>
 
@@ -103,6 +103,8 @@ export default function CrearEmpresa() {
           Crear Empresa
         </Button>
       </Paper>
+
+      <div className="h-10"></div>
     </div>
   );
 }

@@ -97,10 +97,10 @@ export default function RegisterEmpresa() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center px-4 bg-gray-100">
+    <div className="min-h-screen flex justify-center items-center px-4 bg-gray-700">
       <Paper shadow="md" p="xl" radius="lg" className="w-full max-w-md">
         <Title order={2} className="text-center mb-6">
-          Registro Empresa ASMEL
+          Registro de Empresa 
         </Title>
 
         {/* ==============================

@@ -44,6 +44,8 @@ import MarketingEmpresa from "./pages/dashboard/empresa/MerketingEmpresa.jsx";
 import DocumentacionExamenes from "./pages/dashboard/empresa/DocumentacioExamenes.jsx";
 import FacturacionEmpresa from "./pages/dashboard/empresa/FacturacionEmpresa.jsx";
 import RegisterEmpresa from "./pages/register/RegisterEmpresa.jsx";
+import PerfilesEmpresa from "./pages/dashboard/superadmin/PerfilesEmpresa.jsx";
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -183,6 +185,16 @@ createRoot(document.getElementById("root")).render(
                 </SuperAdminGuard>
               }
             />
+
+            <Route
+              path="/dashboard/superadmin/perfiles-empresa"
+              element={
+                <SuperAdminGuard>
+                  <PerfilesEmpresa />
+                </SuperAdminGuard>
+              }
+            />
+            
 
             {/* DASHBOARD STAFF */}
             <Route

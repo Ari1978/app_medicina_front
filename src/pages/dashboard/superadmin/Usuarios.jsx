@@ -10,24 +10,20 @@ export default function Usuarios() {
   const [msg, setMsg] = useState("");
 
   // ===============================
-  // CARGAR USUARIOS (ruta real del backend)
+  // CARGAR USUARIOS
   // ===============================
   useEffect(() => {
-  (async () => {
-    const r = await fetch(`${API}/api/admin/listar-usuarios`, {
-      credentials: "include",
-    });
+    (async () => {
+      const r = await fetch(`${API}/api/admin/listar-usuarios`, {
+        credentials: "include",
+      });
 
-    const data = await r.json();
-    console.log("RESPUESTA BACK:", data);
+      const data = await r.json();
+      console.log("RESPUESTA BACK:", data);
 
-    if (r.ok) {
-      // si el backend devuelve { usuarios: [...] }
       setUsuarios(Array.isArray(data) ? data : data.usuarios ?? []);
-    }
-  })();
-}, []);
-
+    })();
+  }, []);
 
   // ===============================
   // LEER EXCEL
@@ -54,7 +50,7 @@ export default function Usuarios() {
   };
 
   // ===============================
-  // IMPORTAR EXCEL (ruta nueva sugerida)
+  // IMPORTAR EXCEL
   // ===============================
   const importarUsuarios = async () => {
     setLoadingExcel(true);
@@ -73,7 +69,9 @@ export default function Usuarios() {
       if (!r.ok) {
         setMsg(data.message || "Error al importar usuarios.");
       } else {
-        setMsg(`Importación completada: ${data.creados} creados, ${data.existentes} existentes.`);
+        setMsg(
+          `Importación completada: ${data.creados} creados, ${data.existentes} existentes.`
+        );
       }
     } catch (e) {
       console.log(e);
@@ -89,13 +87,14 @@ export default function Usuarios() {
   if (!usuarios) return <p className="text-white p-6">Cargando…</p>;
 
   return (
-    <div className="p-6 text-white">
+    <div className="overflow-y-auto h-[calc(100vh-80px)] p-4 sm:p-6 md:p-10 text-white">
+
       <h1 className="text-2xl font-bold mb-6">Usuarios del sistema</h1>
 
       {/* ==========================
           IMPORTAR EXCEL
-         ========================== */}
-      <div className="mb-8 bg-slate-800 p-4 rounded-xl">
+      ========================== */}
+      <div className="mb-8 bg-slate-800 p-4 rounded-xl shadow-lg">
         <h2 className="text-xl font-semibold mb-3">Importar usuarios desde Excel</h2>
 
         <input
@@ -127,28 +126,32 @@ export default function Usuarios() {
 
       {/* ==========================
           TABLA USUARIOS
-         ========================== */}
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="bg-slate-800">
-            <th className="p-3">Nombre</th>
-            <th className="p-3">Apellido</th>
-            <th className="p-3">Email/Usuario</th>
-            <th className="p-3">Role</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {usuarios.map((u) => (
-            <tr key={u._id} className="border-b border-slate-700">
-              <td className="p-3">{u.nombre || "-"}</td>
-              <td className="p-3">{u.apellido || "-"}</td>
-              <td className="p-3">{u.username || u.email}</td>
-              <td className="p-3 capitalize">{u.role}</td>
+      ========================== */}
+      <div className="overflow-x-auto bg-slate-800 p-4 rounded-xl shadow-lg">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="bg-slate-700">
+              <th className="p-3">Nombre</th>
+              <th className="p-3">Apellido</th>
+              <th className="p-3">Email/Usuario</th>
+              <th className="p-3">Role</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {usuarios.map((u) => (
+              <tr key={u._id} className="border-b border-slate-700">
+                <td className="p-3">{u.nombre || "-"}</td>
+                <td className="p-3">{u.apellido || "-"}</td>
+                <td className="p-3">{u.username || u.email}</td>
+                <td className="p-3 capitalize">{u.role}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="h-10"></div>
     </div>
   );
 }

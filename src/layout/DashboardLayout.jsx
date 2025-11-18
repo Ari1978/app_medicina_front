@@ -18,21 +18,21 @@ export default function DashboardLayout({ children }) {
   ];
 
   return (
-    <div className="flex bg-gray-100 min-h-screen">
+    <div className="flex h-screen overflow-hidden bg-gray-100">
 
-      {/* SIDEBAR */}
+      {/* SIDEBAR DESKTOP */}
       <aside className="hidden lg:flex flex-col w-64 bg-white shadow-lg fixed inset-y-0 z-20">
         <div className="p-6 border-b text-2xl font-bold text-blue-600">
           ASMEL Empresa
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-100 transition
-                ${location.pathname === item.path ? "bg-blue-200 font-semibold text-blue-700" : ""}`}
+              ${location.pathname === item.path ? "bg-blue-200 font-semibold text-blue-700" : ""}`}
             >
               <span>{item.icon}</span>
               {item.label}
@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }) {
         </nav>
       </aside>
 
-      {/* MOBILE SIDEBAR */}
+      {/* BOTÓN MOBILE */}
       <div className="lg:hidden fixed top-4 left-4 z-30">
         <button
           onClick={() => setOpen(true)}
@@ -51,8 +51,12 @@ export default function DashboardLayout({ children }) {
         </button>
       </div>
 
+      {/* SIDEBAR MOBILE */}
       {open && (
-        <div className="lg:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setOpen(false)}>
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setOpen(false)}
+        >
           <aside
             className="absolute left-0 top-0 h-full w-64 bg-white shadow-lg p-6"
             onClick={(e) => e.stopPropagation()}
@@ -71,7 +75,7 @@ export default function DashboardLayout({ children }) {
                   to={item.path}
                   onClick={() => setOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-100 transition
-                    ${location.pathname === item.path ? "bg-blue-200 font-semibold text-blue-700" : ""}`}
+                  ${location.pathname === item.path ? "bg-blue-200 font-semibold text-blue-700" : ""}`}
                 >
                   <span>{item.icon}</span>
                   {item.label}
@@ -82,8 +86,10 @@ export default function DashboardLayout({ children }) {
         </div>
       )}
 
-      {/* CONTENT */}
-      <main className="flex-1 ml-0 lg:ml-64 p-8">{children}</main>
+      {/* CONTENIDO SCROLLEABLE */}
+      <main className="flex-1 ml-0 lg:ml-64 h-full overflow-y-auto p-6 md:p-8">
+        {children}
+      </main>
     </div>
   );
 }

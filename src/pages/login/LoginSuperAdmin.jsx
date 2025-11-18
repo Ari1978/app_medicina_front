@@ -30,7 +30,7 @@ export default function LoginSuperadmin() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100 px-4">
+    <div className="min-h-screen flex justify-center items-center bg-gray-700 px-4">
       <Paper shadow="md" p="xl" radius="lg" className="w-full max-w-md">
         <Title order={2} className="text-center mb-6">
           Acceso SuperAdmin ASMEL

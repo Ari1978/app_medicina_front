@@ -15,6 +15,9 @@ export default function SuperAdminRoutes() {
       <Route path="admin-nuevo" element={<CrearAdmin />} />
       <Route path="staff-nuevo" element={<CrearStaff />} />
       <Route path="usuarios" element={<Usuarios />} />
+      <Route path="/dashboard/superadmin/perfiles-empresa" element={<PerfilesEmpresa />}
+/>
+
     </Routes>
   );
 }

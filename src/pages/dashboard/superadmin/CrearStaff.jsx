@@ -60,9 +60,10 @@ export default function CrearStaff() {
   };
 
   return (
-    <div className="min-h-screen p-6 text-white bg-slate-900">
-      <Paper p="xl" className="max-w-xl mx-auto">
-        <Title order={2} className="mb-6 text-center">
+    <div className="overflow-y-auto h-[calc(100vh-80px)] p-4 sm:p-6 md:p-10 text-white">
+
+      <Paper p="xl" className="max-w-xl mx-auto bg-slate-800 shadow-xl">
+        <Title order={2} className="mb-6 text-center text-white">
           Crear Staff
         </Title>
 
@@ -116,6 +117,8 @@ export default function CrearStaff() {
           Crear Staff
         </Button>
       </Paper>
+
+      <div className="h-10"></div>
     </div>
   );
 }

@@ -13,73 +13,80 @@ export default function EmpresaDashboard() {
   return (
     <DashboardLayout role="user">
 
-      {/* HEADER DEL DASHBOARD */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-semibold">
-            Bienvenido {user?.empresa || "Empresa"}
-          </h2>
-          <p className="text-sm text-slate-400">
-            Panel de gestión empresarial
-          </p>
+      {/* 🔥 CONTENEDOR QUE EVITA QUE EL BOTÓN DE MENÚ TAPE EL HEADER */}
+      <div className="mt-12 sm:mt-0">
+
+        {/* HEADER DEL DASHBOARD */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-blue-600">
+              Bienvenido {user?.empresa || "Empresa"}
+            </h2>
+            <p className="text-sm text-slate-800">
+              Panel de gestión empresarial
+            </p>
+          </div>
+
+          {/* BOTÓN DE LOGOUT */}
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 text-sm rounded-lg bg-red-600 hover:bg-red-700 text-white transition"
+          >
+            Cerrar sesión
+          </button>
         </div>
 
-        {/* BOTÓN DE LOGOUT */}
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 text-sm rounded-lg bg-red-600 hover:bg-red-700 text-white transition"
-        >
-          Cerrar sesión
-        </button>
-      </div>
+        {/* INFORMACIÓN DEL PANEL */}
+        <p className="text-sm text-slate-600 mb-6">
+          Desde aquí podés gestionar ausentismo, exámenes, visitas domiciliarias,
+          facturación y servicios de marketing.
+        </p>
 
-      {/* INFORMACIÓN DEL PANEL */}
-      <p className="text-sm text-slate-400 mb-6">
-        Desde aquí podés gestionar ausentismo, exámenes, visitas domiciliarias,
-        facturación y servicios de marketing.
-      </p>
+        {/* INDICADORES */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <CardKpi title="Turnos próximos" value="12" note="Próximas 48 hs" />
+          <CardKpi title="Exámenes vigentes" value="83%" note="Dotación activa" />
+          <CardKpi title="Casos de ausentismo" value="4" note="En seguimiento" />
+          <CardKpi title="Facturas pendientes" value="2" note="Últimos 30 días" />
+        </div>
 
-      {/* INDICADORES */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <CardKpi title="Turnos próximos" value="12" note="Próximas 48 hs" />
-        <CardKpi title="Exámenes vigentes" value="83%" note="Dotación activa" />
-        <CardKpi title="Casos de ausentismo" value="4" note="En seguimiento" />
-        <CardKpi title="Facturas pendientes" value="2" note="Últimos 30 días" />
-      </div>
+        {/* ACCIONES RÁPIDAS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-24">
+          <QuickAction
+            title="Control de ausentismo"
+            description="Registrar un nuevo caso."
+            to="/dashboard/empresa/ausentismo"
+          />
+          <QuickAction
+            title="Solicitar examen médico"
+            description="Ingresos, periódicos, egresos."
+            to="/dashboard/empresa/examenes"
+          />
+          <QuickAction
+            title="Médico a domicilio"
+            description="Visitas domiciliarias."
+            to="/dashboard/empresa/visitas-domiciliarias"
+          />
+          <QuickAction
+            title="Turnos especiales"
+            description="Especialidades médicas."
+            to="/dashboard/empresa/turnos-especiales"
+          />
+          <QuickAction
+            title="Descargar exámenes"
+            description="PDF de exámenes realizados."
+            to="/dashboard/empresa/documentacion"
+          />
+          <QuickAction
+            title="Facturación"
+            description="Tu facturación mensual."
+            to="/dashboard/empresa/facturacion"
+          />
+        </div>
 
-      {/* ACCIONES RÁPIDAS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <QuickAction
-          title="Control de ausentismo"
-          description="Registrar un nuevo caso."
-          to="/dashboard/empresa/ausentismo"
-        />
-        <QuickAction
-          title="Solicitar examen médico"
-          description="Ingresos, periódicos, egresos."
-          to="/dashboard/empresa/examenes"
-        />
-        <QuickAction
-          title="Médico a domicilio"
-          description="Visitas domiciliarias."
-          to="/dashboard/empresa/visitas-domiciliarias"
-        />
-        <QuickAction
-          title="Turnos especiales"
-          description="Especialidades médicas."
-          to="/dashboard/empresa/turnos-especiales"
-        />
-        <QuickAction
-          title="Descargar exámenes"
-          description="PDF de exámenes realizados."
-          to="/dashboard/empresa/documentacion"
-        />
-        <QuickAction
-          title="Facturación"
-          description="Tu facturación mensual."
-          to="/dashboard/empresa/facturacion"
-        />
-      </div>
+      </div> 
+      {/* 🔥 CIERRE DEL FIX */}
+
     </DashboardLayout>
   );
 }

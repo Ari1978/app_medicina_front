@@ -24,7 +24,6 @@ export default function CrearAdmin() {
     setMsg(null);
 
     try {
-      // 🔥 RUTA CORRECTA
       const res = await fetch(`${API}/api/admin/crear-admin`, {
         method: "POST",
         credentials: "include",
@@ -45,9 +44,10 @@ export default function CrearAdmin() {
   };
 
   return (
-    <div className="min-h-screen p-6 text-white bg-slate-900">
-      <Paper p="xl" radius="lg" className="max-w-xl mx-auto">
-        <Title order={2} className="mb-6 text-center">
+    <div className="overflow-y-auto h-[calc(100vh-80px)] p-4 sm:p-6 md:p-10 text-white">
+
+      <Paper p="xl" radius="lg" className="max-w-xl mx-auto bg-slate-800 shadow-xl">
+        <Title order={2} className="mb-6 text-center text-white">
           Crear Admin
         </Title>
 
@@ -99,6 +99,8 @@ export default function CrearAdmin() {
           Crear Admin
         </Button>
       </Paper>
+
+      <div className="h-10"></div>
     </div>
   );
 }
