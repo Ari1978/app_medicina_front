@@ -3,7 +3,17 @@ import { createContext, useContext, useState, useEffect } from "react";
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const API = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+  // ================================
+  // 🔗 BACKEND URL normalizada
+  // ================================
+  const API = (import.meta.env.VITE_BACKEND_URL || "http://localhost:4000")
+    .replace(/\/$/, ""); // saca el slash final si lo tuviera
+
+  // Helper: asegura que siempre quede bien la URL final
+  const buildUrl = (path) => {
+    if (path.startsWith("/")) return `${API}${path}`;
+    return `${API}/${path}`;
+  };
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,33 +25,24 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
 
     try {
-      // 1) Empresa
-      let res = await fetch(`${API}/api/user/me`, {
-        credentials: "include",
-      });
-
+      // Empresa
+      let res = await fetch(buildUrl("/api/user/me"), { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
         return;
       }
 
-      // 2) Admin / SuperAdmin
-      res = await fetch(`${API}/api/admin/me`, {
-        credentials: "include",
-      });
-
+      // Admin/Superadmin
+      res = await fetch(buildUrl("/api/admin/me"), { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
         return;
       }
 
-      // 3) Staff
-      res = await fetch(`${API}/api/staff/me`, {
-        credentials: "include",
-      });
-
+      // Staff
+      res = await fetch(buildUrl("/api/staff/me"), { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
@@ -49,7 +50,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       setUser(null);
-    } catch {
+    } catch (err) {
+      console.error("❌ Error en checkSession:", err);
       setUser(null);
     } finally {
       setLoading(false);
@@ -77,6 +79,8 @@ export const AuthProvider = ({ children }) => {
       case "superadmin":
         endpoint = "admin";
         break;
+      default:
+        throw new Error("Tipo de login inválido");
     }
 
     const payload =
@@ -84,14 +88,20 @@ export const AuthProvider = ({ children }) => {
         ? { cuit: identifier, password }
         : { username: identifier, password };
 
-    const res = await fetch(`${API}/api/${endpoint}/login`, {
+    const res = await fetch(buildUrl(`/api/${endpoint}/login`), {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error("Error inesperado del servidor");
+    }
+
     if (!res.ok) throw new Error(data.message);
 
     setUser(data.user);
@@ -120,19 +130,17 @@ export const AuthProvider = ({ children }) => {
     }
 
     let endpoint = "user";
+    if (user.role === "admin" || user.role === "superadmin") endpoint = "admin";
+    if (user.role === "staff") endpoint = "staff";
 
-    if (user.role === "admin" || user.role === "superadmin") {
-      endpoint = "admin";
+    try {
+      await fetch(buildUrl(`/api/${endpoint}/logout`), {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.warn("⚠️ Error al cerrar sesión (cliente continúa limpiando estado)");
     }
-
-    if (user.role === "staff") {
-      endpoint = "staff";
-    }
-
-    await fetch(`${API}/api/${endpoint}/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
 
     setUser(null);
   };
