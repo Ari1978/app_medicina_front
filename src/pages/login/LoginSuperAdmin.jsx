@@ -14,19 +14,33 @@ export default function LoginSuperadmin() {
 
   const handleLogin = async () => {
     setError("");
+
+    const cleanUser = username.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanUser || !cleanPass) {
+      setError("Completá usuario y contraseña");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // 🔥 LOGIN SUPERADMIN (usa el rol "superadmin")
-      const redirectPath = await login("superadmin", username, password);
-
-      // 🔥 Redirección al dashboard del superadmin
-      navigate(redirectPath, { replace: true });
+      // SUPERADMIN entra por admin/login
+      const redirect = await login("admin", cleanUser, cleanPass);
+      navigate(redirect, { replace: true });
     } catch (err) {
       setError(err.message || "Credenciales incorrectas");
     }
 
     setLoading(false);
+  };
+
+  // 👉 Iniciar sesión con ENTER
+  const onKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
   };
 
   return (
@@ -41,6 +55,7 @@ export default function LoginSuperadmin() {
           placeholder="Ingresá tu usuario"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          onKeyDown={onKeyPress}  // 👈 acá toma Enter
           required
           mb="sm"
         />
@@ -50,6 +65,7 @@ export default function LoginSuperadmin() {
           placeholder="Ingresá la contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={onKeyPress} // 👈 acá también toma Enter
           required
           mb="md"
         />

@@ -15,10 +15,19 @@ export default function LoginEmpresa() {
 
   const handleLogin = async () => {
     setError("");
+
+    const cleanCuit = cuit.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanCuit || !cleanPass) {
+      setError("Ingresá CUIT y contraseña");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const redirectPath = await login("user", cuit, password);
+      const redirectPath = await login("user", cleanCuit, cleanPass);
       navigate(redirectPath, { replace: true });
     } catch (err) {
       setError(err.message || "Credenciales incorrectas");
@@ -27,10 +36,14 @@ export default function LoginEmpresa() {
     setLoading(false);
   };
 
+  const onKeyPress = (e) => {
+    if (e.key === "Enter") handleLogin();
+  };
+
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-700 px-4">
       <Paper shadow="md" p="xl" radius="lg" className="w-full max-w-md">
-
+        
         {/* ICONO + TÍTULO */}
         <div className="text-center mb-6 flex flex-col items-center">
           <div className="bg-white p-3 rounded-full shadow-lg">
@@ -51,6 +64,7 @@ export default function LoginEmpresa() {
           placeholder="Ingresá el CUIT"
           value={cuit}
           onChange={(e) => setCuit(e.target.value)}
+          onKeyDown={onKeyPress}
           required
           mb="sm"
         />
@@ -60,6 +74,7 @@ export default function LoginEmpresa() {
           placeholder="Ingresá la contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={onKeyPress}
           required
           mb="md"
         />
