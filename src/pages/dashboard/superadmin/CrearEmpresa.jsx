@@ -4,14 +4,11 @@ import { useNavigate } from "react-router-dom";
 
 export default function CrearEmpresa() {
   const navigate = useNavigate();
-  const API = import.meta.env.VITE_BACKEND_URL;
+  const API = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, "");
 
   const [form, setForm] = useState({
     empresa: "",
     cuit: "",
-    contactoNombre: "",
-    contactoEmail: "",
-    password: "temporal123",
   });
 
   const [loading, setLoading] = useState(false);
@@ -39,6 +36,7 @@ export default function CrearEmpresa() {
       setMsg({ type: "ok", text: "Empresa creada correctamente" });
 
       setTimeout(() => navigate("/dashboard/superadmin"), 1000);
+
     } catch (err) {
       setMsg({ type: "err", text: err.message });
     }
@@ -50,11 +48,11 @@ export default function CrearEmpresa() {
     <div className="overflow-y-auto h-[calc(100vh-80px)] p-4 sm:p-6 md:p-10 text-white">
       <Paper shadow="md" p="xl" radius="lg" className="max-w-xl mx-auto bg-slate-800">
         <Title order={2} className="mb-6 text-center text-white">
-          Crear Empresa
+          Registrar Empresa
         </Title>
 
         <TextInput
-          label="Nombre de la empresa"
+          label="Razón Social"
           name="empresa"
           value={form.empresa}
           onChange={handleChange}
@@ -71,24 +69,6 @@ export default function CrearEmpresa() {
           mb="sm"
         />
 
-        <TextInput
-          label="Nombre del contacto"
-          name="contactoNombre"
-          value={form.contactoNombre}
-          onChange={handleChange}
-          required
-          mb="sm"
-        />
-
-        <TextInput
-          label="Email del contacto"
-          name="contactoEmail"
-          value={form.contactoEmail}
-          onChange={handleChange}
-          required
-          mb="sm"
-        />
-
         {msg && (
           <p
             className={`text-center mb-3 ${
@@ -100,7 +80,7 @@ export default function CrearEmpresa() {
         )}
 
         <Button fullWidth loading={loading} onClick={handleSubmit}>
-          Crear Empresa
+          Guardar
         </Button>
       </Paper>
 
