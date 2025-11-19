@@ -6,7 +6,16 @@ import { useAuth } from "../../context/AuthContext";
 export default function SuperAdminDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const API = import.meta.env.VITE_BACKEND_URL;
+
+  // ======================================================
+  // BACKEND URL universal (local + Vercel + Render)
+  // ======================================================
+  const API =
+    import.meta.env.VITE_BACKEND_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:4000";
+
+  const BASE = API.replace(/\/$/, "");
 
   const [resumen, setResumen] = useState({
     empresas: 0,
@@ -22,7 +31,7 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     const fetchResumen = async () => {
       try {
-        const r = await fetch(`${API}/api/admin/listar-usuarios`, {
+        const r = await fetch(`${BASE}/api/admin/listar-usuarios`, {
           credentials: "include",
         });
 
@@ -58,7 +67,7 @@ export default function SuperAdminDashboard() {
         </button>
       </header>
 
-      {/* CONTENIDO SCROLLEABLE (ALTURA EXACTA) */}
+      {/* CONTENIDO SCROLLEABLE */}
       <div className="overflow-y-auto h-[calc(100vh-80px)] p-6 sm:p-10 md:p-10 pb-24">
         {/* KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-10">

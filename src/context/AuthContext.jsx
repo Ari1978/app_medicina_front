@@ -3,46 +3,53 @@ import { createContext, useContext, useState, useEffect } from "react";
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  // ================================
-  // 🔗 BACKEND URL normalizada
-  // ================================
-  const API = (import.meta.env.VITE_BACKEND_URL || "http://localhost:4000")
-    .replace(/\/$/, ""); // saca el slash final si lo tuviera
 
-  // Helper: asegura que siempre quede bien la URL final
+  // ======================================================
+  // BACKEND URL NORMALIZADA (local + Vercel + producción)
+  // ======================================================
+  const API =
+    import.meta.env.VITE_BACKEND_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:4000";
+
+  const BASE = API.replace(/\/$/, "");
+
   const buildUrl = (path) => {
-    if (path.startsWith("/")) return `${API}${path}`;
-    return `${API}/${path}`;
+    if (path.startsWith("/")) return `${BASE}${path}`;
+    return `${BASE}/${path}`;
   };
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ================================
-  // Verificar sesión existente
-  // ================================
+  // ======================================================
+  // CHECK SESSION
+  // ======================================================
   const checkSession = async () => {
     setLoading(true);
 
     try {
-      // Empresa
-      let res = await fetch(buildUrl("/api/user/me"), { credentials: "include" });
+      let res = await fetch(buildUrl("/api/user/me"), {
+        credentials: "include",
+      });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
         return;
       }
 
-      // Admin/Superadmin
-      res = await fetch(buildUrl("/api/admin/me"), { credentials: "include" });
+      res = await fetch(buildUrl("/api/admin/me"), {
+        credentials: "include",
+      });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
         return;
       }
 
-      // Staff
-      res = await fetch(buildUrl("/api/staff/me"), { credentials: "include" });
+      res = await fetch(buildUrl("/api/staff/me"), {
+        credentials: "include",
+      });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
@@ -62,9 +69,9 @@ export const AuthProvider = ({ children }) => {
     checkSession();
   }, []);
 
-  // ================================
+  // ======================================================
   // LOGIN
-  // ================================
+  // ======================================================
   const login = async (type, identifier, password) => {
     let endpoint = "";
 
@@ -95,12 +102,9 @@ export const AuthProvider = ({ children }) => {
       body: JSON.stringify(payload),
     });
 
-    let data;
-    try {
-      data = await res.json();
-    } catch {
+    const data = await res.json().catch(() => {
       throw new Error("Error inesperado del servidor");
-    }
+    });
 
     if (!res.ok) throw new Error(data.message);
 
@@ -120,9 +124,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ================================
+  // ======================================================
   // LOGOUT
-  // ================================
+  // ======================================================
   const logout = async () => {
     if (!user) {
       setUser(null);
@@ -139,7 +143,7 @@ export const AuthProvider = ({ children }) => {
         credentials: "include",
       });
     } catch (err) {
-      console.warn("⚠️ Error al cerrar sesión (cliente continúa limpiando estado)");
+      console.warn("⚠️ Error al cerrar sesión, pero se limpia el estado igualmente");
     }
 
     setUser(null);

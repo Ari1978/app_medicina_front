@@ -11,7 +11,16 @@ import { useNavigate } from "react-router-dom";
 
 export default function RegisterEmpresa() {
   const navigate = useNavigate();
-  const API = import.meta.env.VITE_BACKEND_URL;
+
+  // ======================================================
+  // BACKEND URL UNIVERSAL (local + Vercel + Render)
+  // ======================================================
+  const API =
+    import.meta.env.VITE_BACKEND_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:4000";
+
+  const BASE = API.replace(/\/$/, "");
 
   const [step, setStep] = useState(1);
   const [cuit, setCuit] = useState("");
@@ -27,15 +36,15 @@ export default function RegisterEmpresa() {
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // ---------------------------------------------
+  // -------------------------------------------------------
   // PASO 1: Validar CUIT
-  // ---------------------------------------------
+  // -------------------------------------------------------
   const handleCheckCuit = async () => {
     setLoading(true);
     setMsg(null);
 
     try {
-      const res = await fetch(`${API}/api/user/check-cuit`, {
+      const res = await fetch(`${BASE}/api/user/check-cuit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cuit }),
@@ -46,7 +55,6 @@ export default function RegisterEmpresa() {
 
       setEmpresaData(data);
 
-      // Prellenar datos conocidos
       setForm({
         ...form,
         contactoNombre: data.nombre || "",
@@ -61,15 +69,15 @@ export default function RegisterEmpresa() {
     setLoading(false);
   };
 
-  // ---------------------------------------------
+  // -------------------------------------------------------
   // PASO 2: Registrar empresa
-  // ---------------------------------------------
+  // -------------------------------------------------------
   const handleRegister = async () => {
     setLoading(true);
     setMsg(null);
 
     try {
-      const res = await fetch(`${API}/api/user/register`, {
+      const res = await fetch(`${BASE}/api/user/register`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

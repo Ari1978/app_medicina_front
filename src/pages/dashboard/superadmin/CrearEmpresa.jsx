@@ -4,7 +4,16 @@ import { useNavigate } from "react-router-dom";
 
 export default function CrearEmpresa() {
   const navigate = useNavigate();
-  const API = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, "");
+
+  // ======================================================
+  // BACKEND URL universal (local + Vercel + Render)
+  // ======================================================
+  const API =
+    import.meta.env.VITE_BACKEND_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:4000";
+
+  const BASE = API.replace(/\/$/, "");
 
   const [form, setForm] = useState({
     empresa: "",
@@ -22,7 +31,7 @@ export default function CrearEmpresa() {
     setMsg(null);
 
     try {
-      const res = await fetch(`${API}/api/admin/crear-empresa`, {
+      const res = await fetch(`${BASE}/api/admin/crear-empresa`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

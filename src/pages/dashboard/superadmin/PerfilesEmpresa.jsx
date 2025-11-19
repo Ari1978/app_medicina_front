@@ -3,7 +3,17 @@ import { Select, MultiSelect, Button, TextInput, Paper } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 
 export default function PerfilesEmpresa() {
-  const API = import.meta.env.VITE_BACKEND_URL;
+
+  // ======================================================
+  // BACKEND URL universal (local + Vercel + Render)
+  // ======================================================
+  const API =
+    import.meta.env.VITE_BACKEND_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:4000";
+
+  const BASE = API.replace(/\/$/, "");
+
   const navigate = useNavigate();
 
   const [empresas, setEmpresas] = useState([]);
@@ -11,7 +21,6 @@ export default function PerfilesEmpresa() {
   const [perfiles, setPerfiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Form nuevo perfil
   const [nuevoPerfil, setNuevoPerfil] = useState({
     nombrePerfil: "",
     estudios: [],
@@ -34,7 +43,7 @@ export default function PerfilesEmpresa() {
   useEffect(() => {
     (async () => {
       try {
-        const r = await fetch(`${API}/api/admin/usuarios`, {
+        const r = await fetch(`${BASE}/api/admin/usuarios`, {
           credentials: "include",
         });
 
@@ -45,7 +54,7 @@ export default function PerfilesEmpresa() {
 
         setEmpresas(
           empresasFiltradas.map((e) => ({
-            value: e.cuit, // 🔥 AHORA EL VALUE ES EL CUIT
+            value: e.cuit,
             label: `${e.empresa} (${e.cuit})`,
             cuit: e.cuit,
           }))
@@ -61,19 +70,17 @@ export default function PerfilesEmpresa() {
   ======================================================== */
   const cargarPerfiles = async (cuit) => {
     if (!cuit) return;
-
     setLoading(true);
 
     try {
       const empresa = empresas.find((e) => e.cuit === cuit);
       setEmpresaSeleccionada(empresa);
 
-      const r = await fetch(`${API}/api/admin/empresa/${cuit}/perfiles`, {
+      const r = await fetch(`${BASE}/api/admin/empresa/${cuit}/perfiles`, {
         credentials: "include",
       });
 
       const data = await r.json();
-
       setPerfiles(Array.isArray(data) ? data : []);
     } catch (e) {
       console.log(e);
@@ -90,7 +97,7 @@ export default function PerfilesEmpresa() {
 
     try {
       const r = await fetch(
-        `${API}/api/admin/empresa/${empresaSeleccionada.cuit}/perfiles`,
+        `${BASE}/api/admin/empresa/${empresaSeleccionada.cuit}/perfiles`,
         {
           method: "POST",
           credentials: "include",
@@ -118,12 +125,11 @@ export default function PerfilesEmpresa() {
   ======================================================== */
   const eliminarPerfil = async (perfilId) => {
     if (!empresaSeleccionada) return;
-
     if (!confirm("¿Eliminar este perfil?")) return;
 
     try {
       const r = await fetch(
-        `${API}/api/admin/empresa/${empresaSeleccionada.cuit}/perfiles/${perfilId}`,
+        `${BASE}/api/admin/empresa/${empresaSeleccionada.cuit}/perfiles/${perfilId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -131,15 +137,13 @@ export default function PerfilesEmpresa() {
       );
 
       const data = await r.json();
-
       if (!r.ok) {
         alert(data.message);
         return;
       }
 
-      // Recargar lista
       const res = await fetch(
-        `${API}/api/admin/empresa/${empresaSeleccionada.cuit}/perfiles`,
+        `${BASE}/api/admin/empresa/${empresaSeleccionada.cuit}/perfiles`,
         { credentials: "include" }
       );
 
@@ -152,21 +156,18 @@ export default function PerfilesEmpresa() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-900 text-white">
-      {/* Botón volver arriba fijo */}
       <div className="p-4">
         <Button onClick={() => navigate("/dashboard/superadmin")}>
           ← Volver
         </Button>
       </div>
 
-      {/* CONTENEDOR SCROLLEABLE */}
       <div className="flex-1 overflow-y-auto px-4 pb-32">
         <Paper p="xl" radius="lg" className="max-w-3xl mx-auto bg-slate-800">
           <h1 className="text-2xl font-bold mb-6">
             Perfiles de Examen por Empresa
           </h1>
 
-          {/* SELECT EMPRESA */}
           <Select
             label="Seleccioná una empresa"
             placeholder="Elegir…"
@@ -180,7 +181,6 @@ export default function PerfilesEmpresa() {
 
           {empresaSeleccionada && (
             <>
-              {/* LISTA DE PERFILES */}
               <h2 className="text-xl font-semibold mb-4">
                 Perfiles actuales de {empresaSeleccionada.label}
               </h2>
@@ -215,7 +215,6 @@ export default function PerfilesEmpresa() {
                 ))}
               </div>
 
-              {/* FORMULARIO NUEVO PERFIL */}
               <h2 className="text-xl font-semibold mb-2">
                 Agregar nuevo perfil
               </h2>
