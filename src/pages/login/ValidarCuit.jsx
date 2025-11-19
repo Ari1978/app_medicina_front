@@ -1,9 +1,8 @@
-
+// src/pages/register/ValidarCuit.jsx
 import { useState } from "react";
+import { API, buildUrl } from "../../api";
 
 export default function ValidarCuit() {
-  const API = import.meta.env.VITE_BACKEND_URL;
-
   const [cuit, setCuit] = useState("");
   const [msg, setMsg] = useState(null);
   const [empresa, setEmpresa] = useState(null);
@@ -12,41 +11,48 @@ export default function ValidarCuit() {
     setMsg(null);
     setEmpresa(null);
 
-    const res = await fetch(`${API}/api/auth/validar-cuit/${cuit}`);
-    const data = await res.json();
+    try {
+      const res = await fetch(buildUrl("/api/user/check-cuit"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cuit }),
+      });
 
-    if (!res.ok) {
-      setMsg({ type: "err", text: data.message });
-      return;
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "No se pudo validar el CUIT");
+      }
+
+      setEmpresa(data);
+      setMsg({ type: "ok", text: "Empresa habilitada para registrarse" });
+    } catch (err) {
+      setMsg({ type: "err", text: err.message });
     }
-
-    setMsg({ type: "ok", text: "CUIT válido. Puede registrarse." });
-    setEmpresa(data.empresa);
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-white">
-      <h1 className="text-3xl mb-4">Validar CUIT</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 text-white px-4">
+      <h1 className="text-2xl font-bold mb-4">Validar CUIT</h1>
 
       <input
-        type="text"
-        className="p-2 rounded text-black"
-        placeholder="CUIT"
+        className="bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm w-full max-w-xs"
+        placeholder="Ingresá el CUIT"
         value={cuit}
         onChange={(e) => setCuit(e.target.value)}
       />
 
       <button
         onClick={validar}
-        className="mt-4 bg-blue-600 px-4 py-2 rounded"
+        className="mt-3 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded text-sm font-semibold"
       >
-        Validar CUIT
+        Validar
       </button>
 
       {msg && (
         <p
-          className={`mt-3 ${
-            msg.type === "ok" ? "text-green-400" : "text-red-400"
+          className={`mt-3 text-sm ${
+            msg.type === "err" ? "text-red-400" : "text-green-400"
           }`}
         >
           {msg.text}
@@ -54,9 +60,9 @@ export default function ValidarCuit() {
       )}
 
       {empresa && (
-        <div className="mt-6 bg-slate-800 p-4 rounded">
+        <div className="mt-4 bg-slate-800 border border-slate-700 rounded p-3 text-sm w-full max-w-md">
           <p>Empresa: {empresa.empresa}</p>
-          <p>Contacto: {empresa.contacto.nombre}</p>
+          <p>CUIT: {empresa.cuit}</p>
 
           <a
             className="block mt-4 text-blue-400 underline"

@@ -1,4 +1,5 @@
-import { useState } from "react";
+// src/pages/register/RegisterEmpresa.jsx
+import { useState, useEffect } from "react";
 import {
   TextInput,
   PasswordInput,
@@ -7,20 +8,12 @@ import {
   Title,
   Divider,
 } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { API, buildUrl } from "../../api";
 
 export default function RegisterEmpresa() {
   const navigate = useNavigate();
-
-  // ======================================================
-  // BACKEND URL UNIVERSAL (local + Vercel + Render)
-  // ======================================================
-  const API =
-    import.meta.env.VITE_BACKEND_URL ||
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    "http://localhost:4000";
-
-  const BASE = API.replace(/\/$/, "");
+  const location = useLocation();
 
   const [step, setStep] = useState(1);
   const [cuit, setCuit] = useState("");
@@ -36,15 +29,22 @@ export default function RegisterEmpresa() {
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // -------------------------------------------------------
+  // Si viene ?cuit= desde ValidarCuit, lo tomamos
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const cuitFromQuery = params.get("cuit");
+    if (cuitFromQuery) setCuit(cuitFromQuery);
+  }, [location.search]);
+
+  // ---------------------------------------------
   // PASO 1: Validar CUIT
-  // -------------------------------------------------------
+  // ---------------------------------------------
   const handleCheckCuit = async () => {
     setLoading(true);
     setMsg(null);
 
     try {
-      const res = await fetch(`${BASE}/api/user/check-cuit`, {
+      const res = await fetch(buildUrl("/api/user/check-cuit"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cuit }),
@@ -55,11 +55,11 @@ export default function RegisterEmpresa() {
 
       setEmpresaData(data);
 
-      setForm({
-        ...form,
+      setForm((prev) => ({
+        ...prev,
         contactoNombre: data.nombre || "",
         contactoEmail: data.email || "",
-      });
+      }));
 
       setStep(2);
     } catch (err) {
@@ -69,15 +69,15 @@ export default function RegisterEmpresa() {
     setLoading(false);
   };
 
-  // -------------------------------------------------------
+  // ---------------------------------------------
   // PASO 2: Registrar empresa
-  // -------------------------------------------------------
+  // ---------------------------------------------
   const handleRegister = async () => {
     setLoading(true);
     setMsg(null);
 
     try {
-      const res = await fetch(`${BASE}/api/user/register`, {
+      const res = await fetch(buildUrl("/api/user/register"), {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -108,7 +108,7 @@ export default function RegisterEmpresa() {
     <div className="min-h-screen flex justify-center items-center px-4 bg-gray-700">
       <Paper shadow="md" p="xl" radius="lg" className="w-full max-w-md">
         <Title order={2} className="text-center mb-6">
-          Registro de Empresa 
+          Registro de Empresa
         </Title>
 
         {/* ==============================
@@ -134,7 +134,12 @@ export default function RegisterEmpresa() {
               </p>
             )}
 
-            <Button fullWidth loading={loading} onClick={handleCheckCuit} mt="md">
+            <Button
+              fullWidth
+              loading={loading}
+              onClick={handleCheckCuit}
+              mt="md"
+            >
               Validar CUIT
             </Button>
           </>
@@ -186,7 +191,12 @@ export default function RegisterEmpresa() {
               </p>
             )}
 
-            <Button fullWidth loading={loading} onClick={handleRegister} mt="lg">
+            <Button
+              fullWidth
+              loading={loading}
+              onClick={handleRegister}
+              mt="lg"
+            >
               Completar registro
             </Button>
           </>

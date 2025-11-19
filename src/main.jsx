@@ -1,3 +1,4 @@
+// src/main.jsx
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -17,39 +18,25 @@ import LoginStaff from "./pages/login/LoginStaff.jsx";
 import LoginAdmin from "./pages/login/LoginAdmin.jsx";
 import LoginSuperAdmin from "./pages/login/LoginSuperAdmin.jsx";
 
-// Dashboards
-import EmpresaDashboard from "./pages/dashboard/EmpresaDashboard.jsx";
-import StaffDashboard from "./pages/dashboard/StaffDashboard.jsx";
-import AdminDashboard from "./pages/dashboard/AdminDashboard.jsx";
-import SuperAdminDashboard from "./pages/dashboard/SuperAdminDashboard.jsx";
+// Registro
+import RegisterEmpresa from "./pages/register/RegisterEmpresa.jsx";
+import ValidarCuit from "./pages/register/ValidarCuit.jsx";
+
+// Dashboards (rutas agrupadas)
+import EmpresaRoutes from "./routes/EmpresaRoutes.jsx";
+import StaffRoutes from "./routes/StaffRoutes.jsx";
+import AdminRoutes from "./routes/AdminRoutes.jsx";
+import SuperAdminRoutes from "./routes/SuperAdminRoutes.jsx";
 
 // Guards
-import EmpresaGuard from "./routes/guards/EmpresaGuard.jsx";
-import StaffGuard from "./routes/guards/StaffGuard.jsx";
-import AdminGuard from "./routes/guards/AdminGuard.jsx";
-import SuperAdminGuard from "./routes/guards/SuperAdminGuard.jsx";
-
-//
-import CrearAdmin from "./pages/dashboard/superadmin/CrearAdmin.jsx";
-import CrearEmpresa from "./pages/dashboard/superadmin/CrearEmpresa.jsx";
-import CrearStaff from "./pages/dashboard/superadmin/CrearStaff.jsx";
-import Usuarios from "./pages/dashboard/superadmin/Usuarios.jsx";
-
-// Subpáginas Empresa
-import ControlAusentismo from "./pages/dashboard/empresa/ControlAusentismo.jsx";
-import TurnosEspeciales from "./pages/dashboard/empresa/TurnoEspeciales.jsx";
-import VisitasDomiciliarias from "./pages/dashboard/empresa/VisitasDomiciliarias.jsx";
-import ExamenesMedicos from "./pages/dashboard/empresa/ExamenesMedicos.jsx";
-import MarketingEmpresa from "./pages/dashboard/empresa/MerketingEmpresa.jsx";
-import DocumentacionExamenes from "./pages/dashboard/empresa/DocumentacioExamenes.jsx";
-import FacturacionEmpresa from "./pages/dashboard/empresa/FacturacionEmpresa.jsx";
-import RegisterEmpresa from "./pages/register/RegisterEmpresa.jsx";
-import PerfilesEmpresa from "./pages/dashboard/superadmin/PerfilesEmpresa.jsx";
-
+import EmpresaGuard from "./guards/EmpresaGuard.jsx";
+import StaffGuard from "./guards/StaffGuard.jsx";
+import AdminGuard from "./guards/AdminGuard.jsx";
+import SuperAdminGuard from "./guards/SuperAdminGuard.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <MantineProvider defaultColorScheme="dark">
+    <MantineProvider>
       <AuthProvider>
         <BrowserRouter>
           <Routes>
@@ -58,161 +45,45 @@ createRoot(document.getElementById("root")).render(
 
             {/* Logins */}
             <Route path="/login" element={<LoginEmpresa />} />
-            <Route path="/staff/login" element={<LoginStaff />} />
-            <Route path="/admin/login" element={<LoginAdmin />} />
+            <Route path="/login-staff" element={<LoginStaff />} />
+            <Route path="/login-admin" element={<LoginAdmin />} />
             <Route path="/superadmin/login" element={<LoginSuperAdmin />} />
 
+            {/* Registro */}
             <Route path="/register" element={<RegisterEmpresa />} />
+            <Route path="/validar-cuit" element={<ValidarCuit />} />
 
-
-            {/* DASHBOARD EMPRESA */}
+            {/* Dashboards protegidos */}
             <Route
-              path="/dashboard/empresa"
+              path="/dashboard/empresa/*"
               element={
                 <EmpresaGuard>
-                  <EmpresaDashboard />
+                  <EmpresaRoutes />
                 </EmpresaGuard>
               }
             />
-
-            {/* SUBPÁGINAS EMPRESA */}
             <Route
-              path="/dashboard/empresa/ausentismo"
-              element={
-                <EmpresaGuard>
-                  <ControlAusentismo />
-                </EmpresaGuard>
-              }
-            />
-
-            <Route
-              path="/dashboard/empresa/turnos-especiales"
-              element={
-                <EmpresaGuard>
-                  <TurnosEspeciales />
-                </EmpresaGuard>
-              }
-            />
-
-            <Route
-              path="/dashboard/empresa/visitas-domiciliarias"
-              element={
-                <EmpresaGuard>
-                  <VisitasDomiciliarias />
-                </EmpresaGuard>
-              }
-            />
-
-            <Route
-              path="/dashboard/empresa/examenes"
-              element={
-                <EmpresaGuard>
-                  <ExamenesMedicos />
-                </EmpresaGuard>
-              }
-            />
-
-            <Route
-              path="/dashboard/empresa/marketing"
-              element={
-                <EmpresaGuard>
-                  <MarketingEmpresa />
-                </EmpresaGuard>
-              }
-            />
-
-            <Route
-              path="/dashboard/empresa/documentacion"
-              element={
-                <EmpresaGuard>
-                  <DocumentacionExamenes />
-                </EmpresaGuard>
-              }
-            />
-
-            <Route
-              path="/dashboard/empresa/facturacion"
-              element={
-                <EmpresaGuard>
-                  <FacturacionEmpresa />
-                </EmpresaGuard>
-              }
-            />
-
-            {/* DASHBOARD SUPERADMIN */}
-            <Route
-              path="/dashboard/superadmin"
-              element={
-                <SuperAdminGuard>
-                  <SuperAdminDashboard />
-                </SuperAdminGuard>
-              }
-            />
-
-            {/* SUBPÁGINAS SUPERADMIN */}
-            <Route
-              path="/dashboard/superadmin/empresa-nueva"
-              element={
-                <SuperAdminGuard>
-                  <CrearEmpresa />
-                </SuperAdminGuard>
-              }
-            />
-
-            <Route
-              path="/dashboard/superadmin/admin-nuevo"
-              element={
-                <SuperAdminGuard>
-                  <CrearAdmin />
-                </SuperAdminGuard>
-              }
-            />
-
-            <Route
-              path="/dashboard/superadmin/staff-nuevo"
-              element={
-                <SuperAdminGuard>
-                  <CrearStaff />
-                </SuperAdminGuard>
-              }
-            />
-
-            <Route
-              path="/dashboard/superadmin/usuarios"
-              element={
-                <SuperAdminGuard>
-                  <Usuarios />
-                </SuperAdminGuard>
-              }
-            />
-
-            <Route
-              path="/dashboard/superadmin/perfiles-empresa"
-              element={
-                <SuperAdminGuard>
-                  <PerfilesEmpresa />
-                </SuperAdminGuard>
-              }
-            />
-            
-
-            {/* DASHBOARD STAFF */}
-            <Route
-              path="/dashboard/staff"
+              path="/dashboard/staff/*"
               element={
                 <StaffGuard>
-                  <StaffDashboard />
+                  <StaffRoutes />
                 </StaffGuard>
               }
             />
-
-            {/* DASHBOARD ADMIN */}
             <Route
-              path="/dashboard/admin"
+              path="/dashboard/admin/*"
               element={
                 <AdminGuard>
-                  <AdminDashboard />
+                  <AdminRoutes />
                 </AdminGuard>
+              }
+            />
+            <Route
+              path="/dashboard/superadmin/*"
+              element={
+                <SuperAdminGuard>
+                  <SuperAdminRoutes />
+                </SuperAdminGuard>
               }
             />
           </Routes>

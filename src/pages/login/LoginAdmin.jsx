@@ -1,3 +1,4 @@
+// src/pages/login/LoginAdmin.jsx
 import { useState } from "react";
 import { TextInput, PasswordInput, Button, Paper, Title } from "@mantine/core";
 import { useAuth } from "../../context/AuthContext";
@@ -15,13 +16,10 @@ export default function LoginAdmin() {
     setError("");
 
     try {
-      // 🔥 Admin y SuperAdmin entran por acá
-      const redirect = await login("admin", username, password);
-
-      // 🔥 Redirección EXACTAMENTE como tu LoginStaff
+      const redirect = await login("admin", username.trim(), password.trim());
       window.location.href = redirect;
     } catch (err) {
-      setError(err.message || "Credenciales incorrectas");
+      setError(err.message || "Error al iniciar sesión");
     }
 
     setLoading(false);

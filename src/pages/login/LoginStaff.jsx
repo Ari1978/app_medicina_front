@@ -1,8 +1,9 @@
+// src/pages/login/LoginStaff.jsx
 import { useState } from "react";
 import { TextInput, PasswordInput, Button, Paper, Title } from "@mantine/core";
 import { useAuth } from "../../context/AuthContext";
 
-export default function LoginSuperadmin() {
+export default function LoginStaff() {
   const { login } = useAuth();
 
   const [username, setUsername] = useState("");
@@ -15,23 +16,20 @@ export default function LoginSuperadmin() {
     setLoading(true);
 
     try {
-      // 🔥 Login con el rol "superadmin"
-      const redirect = await login("superadmin", username, password);
-
-      // 🔥 Redirección igual que Staff
+      const redirect = await login("staff", username.trim(), password.trim());
       window.location.href = redirect;
     } catch (err) {
-      setError(err.message || "Credenciales incorrectas");
+      setError(err.message || "Error al iniciar sesión");
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100 px-4">
+    <div className="min-h-screen flex justify-center items-center bg-gray-700 px-4">
       <Paper shadow="md" p="xl" radius="lg" className="w-full max-w-md">
         <Title order={2} className="text-center mb-6">
-          Acceso SuperAdmin
+          Acceso Staff ASMEL
         </Title>
 
         <TextInput

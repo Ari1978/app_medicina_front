@@ -1,34 +1,21 @@
+// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
+import { API, buildUrl } from "../api";
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-
-  // ======================================================
-  // BACKEND URL NORMALIZADA (local + Vercel + producción)
-  // ======================================================
-  const API =
-    import.meta.env.VITE_BACKEND_URL ||
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    "http://localhost:4000";
-
-  const BASE = API.replace(/\/$/, "");
-
-  const buildUrl = (path) => {
-    if (path.startsWith("/")) return `${BASE}${path}`;
-    return `${BASE}/${path}`;
-  };
-
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // ======================================================
-  // CHECK SESSION
+  // 🔍 Verificar sesión existente (/me)
   // ======================================================
   const checkSession = async () => {
     setLoading(true);
 
     try {
+      // 1) Empresa
       let res = await fetch(buildUrl("/api/user/me"), {
         credentials: "include",
       });
@@ -38,6 +25,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      // 2) Admin / Superadmin
       res = await fetch(buildUrl("/api/admin/me"), {
         credentials: "include",
       });
@@ -47,6 +35,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      // 3) Staff
       res = await fetch(buildUrl("/api/staff/me"), {
         credentials: "include",
       });
@@ -70,7 +59,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // ======================================================
-  // LOGIN
+  // 🔐 LOGIN
+  //   type: "user" | "staff" | "admin" | "superadmin"
   // ======================================================
   const login = async (type, identifier, password) => {
     let endpoint = "";
@@ -102,14 +92,20 @@ export const AuthProvider = ({ children }) => {
       body: JSON.stringify(payload),
     });
 
-    const data = await res.json().catch(() => {
+    let data;
+    try {
+      data = await res.json();
+    } catch {
       throw new Error("Error inesperado del servidor");
-    });
+    }
 
-    if (!res.ok) throw new Error(data.message);
+    if (!res.ok) {
+      throw new Error(data.message || "Error de autenticación");
+    }
 
     setUser(data.user);
 
+    // Redirecciones según rol real devuelto por el backend
     switch (data.user.role) {
       case "user":
         return "/dashboard/empresa";
@@ -125,7 +121,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ======================================================
-  // LOGOUT
+  // 🚪 LOGOUT
   // ======================================================
   const logout = async () => {
     if (!user) {
@@ -143,7 +139,9 @@ export const AuthProvider = ({ children }) => {
         credentials: "include",
       });
     } catch (err) {
-      console.warn("⚠️ Error al cerrar sesión, pero se limpia el estado igualmente");
+      console.warn(
+        "⚠️ Error al cerrar sesión, pero se limpia el estado igualmente"
+      );
     }
 
     setUser(null);

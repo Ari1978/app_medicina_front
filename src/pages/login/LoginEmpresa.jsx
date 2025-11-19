@@ -43,7 +43,6 @@ export default function LoginEmpresa() {
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-700 px-4">
       <Paper shadow="md" p="xl" radius="lg" className="w-full max-w-md">
-        
         {/* ICONO + TÍTULO */}
         <div className="text-center mb-6 flex flex-col items-center">
           <div className="bg-white p-3 rounded-full shadow-lg">
@@ -58,7 +57,6 @@ export default function LoginEmpresa() {
           </Title>
         </div>
 
-        {/* FORMULARIO */}
         <TextInput
           label="CUIT"
           placeholder="Ingresá el CUIT"
@@ -87,15 +85,16 @@ export default function LoginEmpresa() {
           Ingresar
         </Button>
 
-        {/* registrar */}
         <p className="text-center text-sm mt-4 text-gray-200">
           ¿No tenés cuenta?{" "}
-          <Link to="/register" className="text-indigo-400 font-semibold hover:text-indigo-300">
+          <Link
+            to="/register"
+            className="text-indigo-400 font-semibold hover:text-indigo-300"
+          >
             Crear cuenta
           </Link>
         </p>
 
-        {/* volver al inicio */}
         <div className="text-center mt-4">
           <Link
             to="/"

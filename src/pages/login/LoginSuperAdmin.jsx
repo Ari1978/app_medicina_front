@@ -1,3 +1,4 @@
+// src/pages/login/LoginSuperAdmin.jsx
 import { useState } from "react";
 import { TextInput, PasswordInput, Button, Paper, Title } from "@mantine/core";
 import { useAuth } from "../../context/AuthContext";
@@ -26,7 +27,7 @@ export default function LoginSuperadmin() {
     setLoading(true);
 
     try {
-      // SUPERADMIN entra por admin/login
+      // entra por /api/admin/login, el backend decide si es superadmin
       const redirect = await login("admin", cleanUser, cleanPass);
       navigate(redirect, { replace: true });
     } catch (err) {
@@ -36,7 +37,6 @@ export default function LoginSuperadmin() {
     setLoading(false);
   };
 
-  // 👉 Iniciar sesión con ENTER
   const onKeyPress = (e) => {
     if (e.key === "Enter") {
       handleLogin();
@@ -55,7 +55,7 @@ export default function LoginSuperadmin() {
           placeholder="Ingresá tu usuario"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          onKeyDown={onKeyPress}  // 👈 acá toma Enter
+          onKeyDown={onKeyPress}
           required
           mb="sm"
         />
@@ -65,7 +65,7 @@ export default function LoginSuperadmin() {
           placeholder="Ingresá la contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={onKeyPress} // 👈 acá también toma Enter
+          onKeyDown={onKeyPress}
           required
           mb="md"
         />
